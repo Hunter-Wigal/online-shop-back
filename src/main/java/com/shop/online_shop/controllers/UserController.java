@@ -2,13 +2,16 @@ package com.shop.online_shop.controllers;
 
 import com.shop.online_shop.entities.UserEntity;
 import com.shop.online_shop.repositories.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("api/v1/customers")
+@RequestMapping("api/v1/user")
 public class UserController {
     private final UserRepository userRepository;
 
@@ -17,26 +20,60 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public List<UserEntity> getAllCustomers(){
+    public List<UserEntity> getAllUsers(){
         return this.userRepository.findAll();
     }
 
-
-
-    public record NewCustomerRequest(
+    public record NewUserRequest(
             String name,
             String email,
             Integer age
     ){}
-
     @PostMapping
-    public void addCustomer(@RequestBody NewCustomerRequest request){
+    public void addUser(@RequestBody NewUserRequest request){
         UserEntity userEntity = new UserEntity();
         userEntity.setName(request.name());
         userEntity.setEmail(request.email());
         userEntity.setAge(request.age());
 
         this.userRepository.save(userEntity);
+    }
+
+    public record UserResponse(
+            String email,
+            String name,
+            Integer age
+    ){}
+
+    @GetMapping("user")
+    public ResponseEntity<UserResponse> getUser(@RequestParam("username") String username){
+        Optional<UserEntity> check = this.userRepository.findByEmail(username);
+
+        UserResponse response;
+        if(check.isPresent()){
+            response = new UserResponse(check.get().getEmail(), check.get().getName(), check.get().getAge());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping("user")
+    public ResponseEntity<String> updateUser(@RequestBody NewUserRequest request){
+        Optional<UserEntity> check = this.userRepository.findByEmail(request.email());
+
+        if(check.isEmpty()){
+            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
+        }
+        UserEntity user = check.get();
+        if(request.age() != null){
+            user.setAge(request.age());
+        }
+        if(request.name() != null){
+            user.setName(request.name());
+        }
+        this.userRepository.save(user);
+        return new ResponseEntity<>("Successfully updated user", HttpStatus.OK);
     }
 
 }

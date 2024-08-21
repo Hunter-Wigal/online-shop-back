@@ -1,6 +1,7 @@
 package com.shop.online_shop.controllers;
 
 import com.shop.online_shop.dto.AuthResponseDto;
+import com.shop.online_shop.dto.RegisterDto;
 import com.shop.online_shop.entities.Roles;
 import com.shop.online_shop.entities.UserEntity;
 import com.shop.online_shop.repositories.RoleRepository;
@@ -21,11 +22,11 @@ import java.util.Collections;
 @CrossOrigin(origins = "*") //http://localhost:5173"
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    private AuthenticationManager authenticationManager;
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder;
-    private JWTGenerator jwtGenerator;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JWTGenerator jwtGenerator;
 
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository,
                           RoleRepository roleRepository, PasswordEncoder passwordEncoder, JWTGenerator jwtGenerator) {
@@ -37,15 +38,8 @@ public class AuthController {
     }
 
 
-    @PostMapping("test")
-    public ResponseEntity<String> test(){
-        return new ResponseEntity<>("Successful post", HttpStatus.OK);
-    }
 
-    public record RegisterDto(
-        String email,
-        String password
-    ){}
+    // TODO move the dtos
 
     public record LoginDto(
             String email,
@@ -58,11 +52,12 @@ public class AuthController {
             return new ResponseEntity<>("Username is taken", HttpStatus.BAD_REQUEST);
         }
 
+        // Create new user and save to database
         UserEntity user = new UserEntity();
         user.setEmail(request.email);
         user.setPassword(passwordEncoder.encode(request.password));
 
-        Roles roles = roleRepository.findByName("ADMIN").get();
+        Roles roles = roleRepository.findByName("USER").get();
         user.setRoles(Collections.singletonList(roles));
 
         userRepository.save(user);
@@ -72,7 +67,7 @@ public class AuthController {
 
     @PostMapping("login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto request){
-        Authentication authentication = null;
+        Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email, request.password)
@@ -81,23 +76,13 @@ public class AuthController {
         catch(Exception e){
             return new ResponseEntity<>(new AuthResponseDto(null,"Username or password is incorrect"), HttpStatus.UNAUTHORIZED);
         }
+        // Set current context to auth provided by logging in
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Return a token for keeping the session
         String token = jwtGenerator.generateToken(authentication);
 
         return new ResponseEntity<>(new AuthResponseDto(token, "Successfully logged in"), HttpStatus.OK);
     }
 
-    @GetMapping("login")
-    public ResponseEntity<String> testLogin(@RequestBody String request){
-        System.out.println(request);
-        return new ResponseEntity<>("Get operation works", HttpStatus.OK);
-    }
-
-    @GetMapping("register")
-    public ResponseEntity<String> getRegister(){
-        return new ResponseEntity<>("Guess it's working", HttpStatus.OK);
-    }
 }
-
-
-

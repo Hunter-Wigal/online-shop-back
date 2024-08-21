@@ -1,6 +1,5 @@
 package com.shop.online_shop.security;
 
-import com.shop.online_shop.services.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,14 +7,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -31,71 +27,58 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private CustomUserDetailsService userDetailsService;
+    private final JwtAuthEntryPoint authEntryPoint;
 
-    private JwtAuthEntryPoint authEntryPoint;
-
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final AuthenticationProvider authenticationProvider;
 
     @Autowired
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthEntryPoint authEntryPoint,
+    public SecurityConfig(JwtAuthEntryPoint authEntryPoint,
                           JwtAuthenticationFilter jwtAuthenticationFilter, AuthenticationProvider authenticationProvider) {
-        this.userDetailsService = userDetailsService;
         this.authEntryPoint = authEntryPoint;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationProvider = authenticationProvider;
     }
 
+    // Configures security options such as specific route permissions, cors, and csrf
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-//                .securityMatcher(antMatcher("/api/v1/**"))
                 .cors(AbstractHttpConfigurer::disable)
+
+                // Determine who is authorized at which endpoints
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-//                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
-//                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-//                        .requestMatchers("/api/v1/products/**").authenticated()
-                                .requestMatchers("api/v1/products/**").hasAuthority("ADMIN")
-                        .anyRequest().authenticated()
+                        // Only allow posting at this route. Used for logging in and registering
+                        .requestMatchers(HttpMethod.POST,"/api/v1/auth/**").permitAll()
+                        // Allow requesting user information if logged in
+                        .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
+                        // Allow anyone to view products
+                        .requestMatchers(HttpMethod.GET,"api/v1/products/**").permitAll()
+                        // Only allow admin to post to products api
+                        .requestMatchers(HttpMethod.POST,"api/v1/products/**").hasRole("ADMIN")
+                        // Temporary let every other request work
+                        .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults())
                 .csrf((csrf) -> csrf
                         // TODO figure out why this isn't working
+                        // TODO add proper csrf protection
 //                        .ignoringRequestMatchers("/api/v1/auth/**")
 
                                 .disable()
 //                        .ignoringRequestMatchers("http://localhost:5173/**")
                 )
+                // Cors defined below
                 .cors((cors)->{})
+                // Handle exceptions elsewhere
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider);
 
-//                .formLogin(withDefaults());
-
         http.addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
-//    @Bean
-//    public JwtAuthenticationFilter jwtAuthenticationFilter(){
-//        return new JwtAuthenticationFilter();
-//    }
-
-    // Overrides custom user detail service
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails userDetails = User.withDefaultPasswordEncoder()
-//                .username("user")
-//                .password("password")
-//                .roles("USER")
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(userDetails);
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
@@ -104,14 +87,14 @@ public class SecurityConfig {
 
 
 
-
-
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+        // Allow requests from local react app
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
+        // only allow these methods and headers
+        configuration.setAllowedMethods(List.of("GET","POST", "PUT"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type", "Method", "Accept"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
