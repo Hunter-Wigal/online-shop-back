@@ -58,6 +58,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    //TODO change this to a patch mapping with a pathvariable for the username
     @PutMapping("user")
     public ResponseEntity<String> updateUser(@RequestBody NewUserRequest request){
         Optional<UserEntity> check = this.userRepository.findByEmail(request.email());
@@ -74,6 +75,12 @@ public class UserController {
         }
         this.userRepository.save(user);
         return new ResponseEntity<>("Successfully updated user", HttpStatus.OK);
+    }
+
+    @DeleteMapping("{username}")
+    public ResponseEntity delete(@PathVariable("username") String username){
+        // implement logic here
+        return new ResponseEntity(false, HttpStatus.NOT_IMPLEMENTED);
     }
 
 }

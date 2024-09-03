@@ -25,7 +25,6 @@ public class JWTGenerator {
 
         Collection<? extends GrantedAuthority> roles = authentication.getAuthorities();
 
-
         // Make new key with proper details
         return Jwts.builder()
                 .subject(username)

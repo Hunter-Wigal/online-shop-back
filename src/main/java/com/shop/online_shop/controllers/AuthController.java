@@ -12,10 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.Collections;
 
 @RestController
@@ -79,10 +82,33 @@ public class AuthController {
         // Set current context to auth provided by logging in
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+
         // Return a token for keeping the session
         String token = jwtGenerator.generateToken(authentication);
 
         return new ResponseEntity<>(new AuthResponseDto(token, "Successfully logged in"), HttpStatus.OK);
     }
 
+    @PostMapping("logout")
+    public ResponseEntity<String> logout(){
+        SecurityContextHolder.clearContext();
+
+        return new ResponseEntity<>("Successfully logged out", HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("valid")
+    public ResponseEntity<Boolean> valid(){
+        // implement logic here
+        Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        SimpleGrantedAuthority user = new SimpleGrantedAuthority(roleRepository.findByName("USER").get().getName());
+        try {
+            if (authorities.contains(user))
+                return new ResponseEntity<>(true, HttpStatus.OK);
+            else
+                return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+        }
+    }
 }

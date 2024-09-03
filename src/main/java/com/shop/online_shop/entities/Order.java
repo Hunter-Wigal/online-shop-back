@@ -12,7 +12,8 @@ import java.util.Objects;
 
 @Data
 @NoArgsConstructor
-public class Transaction {
+@Table(name="transactions")
+public class Order {
     @Id
     @SequenceGenerator(
             name = "order_id_sequence",
@@ -29,11 +30,11 @@ public class Transaction {
     private Integer quantity;
     private String status;
 
-    public Transaction(Integer transaction_id,
-                       Integer item_id,
-                       Integer user_id,
-                       Integer quantity,
-                       String status){
+    public Order(Integer transaction_id,
+                 Integer item_id,
+                 Integer user_id,
+                 Integer quantity,
+                 String status){
         this.transaction_id = transaction_id;
         this.item_id = item_id;
         this.user_id = user_id;
@@ -45,8 +46,8 @@ public class Transaction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Transaction transaction = (Transaction) o;
-        return Objects.equals(transaction_id, transaction.transaction_id) && Objects.equals(item_id, transaction.item_id) && Objects.equals(user_id, transaction.user_id) && Objects.equals(quantity, transaction.quantity) && Objects.equals(status, transaction.status);
+        Order order = (Order) o;
+        return Objects.equals(transaction_id, order.transaction_id) && Objects.equals(item_id, order.item_id) && Objects.equals(user_id, order.user_id) && Objects.equals(quantity, order.quantity) && Objects.equals(status, order.status);
     }
 
     @Override
