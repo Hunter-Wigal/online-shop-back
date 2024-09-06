@@ -6,8 +6,9 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: hunter
       PGDATA: /data/postgres
+
     ports:
-      - '5432'
+      - '5432:5432'
     volumes:
       - db:/data/postgres
 volumes:

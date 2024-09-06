@@ -23,14 +23,14 @@ public class UserEntity {
             strategy = GenerationType.SEQUENCE,
             generator = "user_id_sequence"
     )
-    private Integer id;
+    private Integer user_id;
     private String name;
     private String email;
     private Integer age;
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name="user_roles", joinColumns = @JoinColumn(name="user_id", referencedColumnName = "id"),
+    @JoinTable(name="user_roles", joinColumns = @JoinColumn(name="user_id", referencedColumnName = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Roles> roles = new ArrayList<>();
 
@@ -39,18 +39,18 @@ public class UserEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity userEntity = (UserEntity) o;
-        return Objects.equals(id, userEntity.id) && Objects.equals(name, userEntity.name) && Objects.equals(email, userEntity.email) && Objects.equals(age, userEntity.age);
+        return Objects.equals(user_id, userEntity.user_id) && Objects.equals(name, userEntity.name) && Objects.equals(email, userEntity.email) && Objects.equals(age, userEntity.age);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, age);
+        return Objects.hash(user_id, name, email, age);
     }
 
     @Override
     public String toString() {
         return "user{" +
-                "id=" + id +
+                "id=" + user_id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", age=" + age +

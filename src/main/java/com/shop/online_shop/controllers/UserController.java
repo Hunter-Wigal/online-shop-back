@@ -45,9 +45,23 @@ public class UserController {
             Integer age
     ){}
 
+    // TODO make this use body instead of param
     @GetMapping("user")
     public ResponseEntity<UserResponse> getUser(@RequestParam("username") String username){
         Optional<UserEntity> check = this.userRepository.findByEmail(username);
+
+        UserResponse response;
+        if(check.isPresent()){
+            response = new UserResponse(check.get().getEmail(), check.get().getName(), check.get().getAge());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("user_id")
+    public ResponseEntity<UserResponse> getUser(@RequestBody Integer id){
+        Optional<UserEntity> check = this.userRepository.findById(id);
 
         UserResponse response;
         if(check.isPresent()){

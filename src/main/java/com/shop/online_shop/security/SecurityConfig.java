@@ -57,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"api/v1/products/**").permitAll()
                         // Only allow admin to post to products api
                         .requestMatchers(HttpMethod.POST,"api/v1/products/**").hasRole("ADMIN")
+                        // Once tested, change to only allow admin to get order
+                        .requestMatchers(HttpMethod.GET, "api/v1/orders/**").permitAll()
                         // Temporary let every other request work
                         .anyRequest().permitAll()
                 )
