@@ -1,10 +1,12 @@
 package com.shop.online_shop.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.Objects;
 
 @Entity
+@Data
 public class Product {
     @Id
     @SequenceGenerator(

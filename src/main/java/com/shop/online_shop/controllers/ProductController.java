@@ -28,7 +28,7 @@ public class ProductController {
     @PostMapping
     public void addProduct(@RequestBody ProductController.NewProductRequest request){
         Product newProduct = new Product();
-        newProduct.setItemName(request.item_name);
+        newProduct.setItem_name(request.item_name);
         newProduct.setDescription(request.description);
         newProduct.setPrice(request.price);
 
@@ -48,10 +48,20 @@ public class ProductController {
         return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    public record UpdateRequest(
+            String item_name,
+            String item_description
+    ){}
     @PatchMapping(path="{product_id}")
-    public ResponseEntity updateProduct(@PathVariable("product_id") String id){
+    public ResponseEntity<String> updateProduct(@PathVariable("product_id") String id, @RequestBody UpdateRequest request){
         // implement logic here
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
+        Product product = this.productRepository.getReferenceById(Integer.parseInt(id));
+        product.setItem_name(request.item_name);
+        product.setDescription(request.item_description);
+
+        this.productRepository.save(product);
+
+        return new ResponseEntity<>("Successfully updated",HttpStatus.OK);
     }
 
     @DeleteMapping(path="{product_id}")

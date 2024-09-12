@@ -57,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"api/v1/products/**").permitAll()
                         // Only allow admin to post to products api
                         .requestMatchers(HttpMethod.POST,"api/v1/products/**").hasRole("ADMIN")
+                        // Change to only admin
+                        .requestMatchers(HttpMethod.PATCH, "api/v1/products/**").permitAll()
                         // Once tested, change to only allow admin to get order
                         .requestMatchers(HttpMethod.GET, "api/v1/orders/**").permitAll()
                         // Temporary let every other request work
@@ -96,7 +98,7 @@ public class SecurityConfig {
         // Allow requests from local react app
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         // only allow these methods and headers
-        configuration.setAllowedMethods(List.of("GET","POST", "PUT"));
+        configuration.setAllowedMethods(List.of("GET","POST", "PUT", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type", "Method", "Accept"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
