@@ -1,6 +1,6 @@
 package com.shop.online_shop.controllers;
 
-import com.shop.online_shop.entities.UserEntity;
+import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public List<UserEntity> getAllUsers(){
+    public List<User> getAllUsers(){
         return this.userRepository.findAll();
     }
 
@@ -31,12 +31,12 @@ public class UserController {
     ){}
     @PostMapping
     public void addUser(@RequestBody NewUserRequest request){
-        UserEntity userEntity = new UserEntity();
-        userEntity.setName(request.name());
-        userEntity.setEmail(request.email());
-        userEntity.setAge(request.age());
+        User user = new User();
+        user.setName(request.name());
+        user.setEmail(request.email());
+        user.setAge(request.age());
 
-        this.userRepository.save(userEntity);
+        this.userRepository.save(user);
     }
 
     public record UserResponse(
@@ -48,7 +48,7 @@ public class UserController {
     // TODO make this use body instead of param
     @GetMapping("user")
     public ResponseEntity<UserResponse> getUser(@RequestParam("username") String username){
-        Optional<UserEntity> check = this.userRepository.findByEmail(username);
+        Optional<User> check = this.userRepository.findByEmail(username);
 
         UserResponse response;
         if(check.isPresent()){
@@ -61,7 +61,7 @@ public class UserController {
 
     @GetMapping("user_id")
     public ResponseEntity<UserResponse> getUser(@RequestBody Integer id){
-        Optional<UserEntity> check = this.userRepository.findById(id);
+        Optional<User> check = this.userRepository.findById(id);
 
         UserResponse response;
         if(check.isPresent()){
@@ -75,12 +75,12 @@ public class UserController {
     //TODO change this to a patch mapping with a pathvariable for the username
     @PutMapping("user")
     public ResponseEntity<String> updateUser(@RequestBody NewUserRequest request){
-        Optional<UserEntity> check = this.userRepository.findByEmail(request.email());
+        Optional<User> check = this.userRepository.findByEmail(request.email());
 
         if(check.isEmpty()){
             return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
         }
-        UserEntity user = check.get();
+        User user = check.get();
         if(request.age() != null){
             user.setAge(request.age());
         }
@@ -92,8 +92,9 @@ public class UserController {
     }
 
     @DeleteMapping("{username}")
-    public ResponseEntity delete(@PathVariable("username") String username){
+    public ResponseEntity<Boolean> delete(@PathVariable("username") String username){
         // implement logic here
+        System.out.println(username);
         return new ResponseEntity(false, HttpStatus.NOT_IMPLEMENTED);
     }
 

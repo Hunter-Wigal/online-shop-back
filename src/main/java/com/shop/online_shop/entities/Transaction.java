@@ -14,16 +14,16 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @Table(name="transactions")
-public class Order {
+public class Transaction {
     @Id
     @SequenceGenerator(
-            name = "order_id_sequence",
-            sequenceName = "order_id_sequence",
+            name = "transaction_id_sequence",
+            sequenceName = "transaction_id_sequence",
             allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "order_id_sequence"
+            generator = "transaction_id_sequence"
     )
     private Integer transaction_id;
 
@@ -33,18 +33,18 @@ public class Order {
     private Product product;
 
     // One to one
-    @OneToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
+    @OneToOne(targetEntity = User.class, cascade = CascadeType.ALL)
     @JoinColumn(name="user_id", referencedColumnName = "user_id")
-    private UserEntity user_id;
+    private User user_id;
 
     private Integer quantity;
     private String status;
 
-    public Order(Integer transaction_id,
-                 Product product,
-                 UserEntity user_id,
-                 Integer quantity,
-                 String status){
+    public Transaction(Integer transaction_id,
+                       Product product,
+                       User user_id,
+                       Integer quantity,
+                       String status){
         this.transaction_id = transaction_id;
         this.product = product;
         this.user_id = user_id;
@@ -56,8 +56,8 @@ public class Order {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Order order = (Order) o;
-        return Objects.equals(transaction_id, order.transaction_id) && Objects.equals(product, order.product) && Objects.equals(user_id, order.user_id) && Objects.equals(quantity, order.quantity) && Objects.equals(status, order.status);
+        Transaction transaction = (Transaction) o;
+        return Objects.equals(transaction_id, transaction.transaction_id) && Objects.equals(product, transaction.product) && Objects.equals(user_id, transaction.user_id) && Objects.equals(quantity, transaction.quantity) && Objects.equals(status, transaction.status);
     }
 
     @Override

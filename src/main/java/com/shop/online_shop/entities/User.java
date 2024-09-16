@@ -12,7 +12,7 @@ import java.util.Objects;
 @Table(name="users")
 @Data
 @NoArgsConstructor
-public class UserEntity {
+public class User {
     @Id
     @SequenceGenerator(
             name = "user_id_sequence",
@@ -38,8 +38,8 @@ public class UserEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserEntity userEntity = (UserEntity) o;
-        return Objects.equals(user_id, userEntity.user_id) && Objects.equals(name, userEntity.name) && Objects.equals(email, userEntity.email) && Objects.equals(age, userEntity.age);
+        User user = (User) o;
+        return Objects.equals(user_id, user.user_id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(age, user.age);
     }
 
     @Override

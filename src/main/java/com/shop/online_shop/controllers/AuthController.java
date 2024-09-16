@@ -3,7 +3,7 @@ package com.shop.online_shop.controllers;
 import com.shop.online_shop.dto.AuthResponseDto;
 import com.shop.online_shop.dto.RegisterDto;
 import com.shop.online_shop.entities.Roles;
-import com.shop.online_shop.entities.UserEntity;
+import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.RoleRepository;
 import com.shop.online_shop.repositories.UserRepository;
 import com.shop.online_shop.security.JWTGenerator;
@@ -56,7 +56,7 @@ public class AuthController {
         }
 
         // Create new user and save to database
-        UserEntity user = new UserEntity();
+        User user = new User();
         user.setEmail(request.email);
         user.setPassword(passwordEncoder.encode(request.password));
 

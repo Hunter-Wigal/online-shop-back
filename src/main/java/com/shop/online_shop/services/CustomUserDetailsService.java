@@ -1,12 +1,11 @@
 package com.shop.online_shop.services;
 
 import com.shop.online_shop.entities.Roles;
-import com.shop.online_shop.entities.UserEntity;
+import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public CustomUserDetailsService(UserRepository userRepository) {
@@ -27,8 +26,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
-        return new User(user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
+        User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
 
     }
 
