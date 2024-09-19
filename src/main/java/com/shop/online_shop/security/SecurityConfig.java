@@ -56,11 +56,12 @@ public class SecurityConfig {
                         // Allow anyone to view products
                         .requestMatchers(HttpMethod.GET,"api/v1/products/**").permitAll()
                         // Only allow admin to post to products api
-                        .requestMatchers(HttpMethod.POST,"api/v1/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"api/v1/products/**").permitAll() //.hasRole("ADMIN")
                         // Change to only admin
                         .requestMatchers(HttpMethod.PATCH, "api/v1/products/**").permitAll()
                         // Once tested, change to only allow admin to get order
                         .requestMatchers(HttpMethod.GET, "api/v1/orders/**").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").authenticated()
                         // Temporary let every other request work
                         .anyRequest().permitAll()
                 )

@@ -18,16 +18,16 @@ public class Product {
             strategy = GenerationType.SEQUENCE,
             generator = "product_id_sequence"
     )
-    private Integer id;
+    private Integer product_id;
     private String item_name;
     private String description;
     private Double price;
 
-    public Product(Integer id,
+    public Product(Integer product_id,
                 String item_name,
                 String description,
                 Double price){
-        this.id = id;
+        this.product_id = product_id;
         this.item_name = item_name;
         this.description = description;
         this.price = price;
@@ -41,18 +41,18 @@ public class Product {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return Objects.equals(id, product.id) && Objects.equals(item_name, product.item_name) && Objects.equals(description, product.description) && Objects.equals(price, product.price);
+        return Objects.equals(product_id, product.product_id) && Objects.equals(item_name, product.item_name) && Objects.equals(description, product.description) && Objects.equals(price, product.price);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, item_name, description, price);
+        return Objects.hash(product_id, item_name, description, price);
     }
 
     @Override
     public String toString() {
         return "product{" +
-                "id=" + id +
+                "id=" + product_id +
                 ", item_name='" + item_name + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +

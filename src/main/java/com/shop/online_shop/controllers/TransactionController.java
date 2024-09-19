@@ -12,17 +12,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("api/v1/orders")
-public class OrderController {
+public class TransactionController {
     private final TransactionRepository transactionRepository;
     private final ProductRepository productRepository;
     private final UserRepository customerRepository;
 
-    public OrderController(TransactionRepository transactionRepository, ProductRepository productRepository, UserRepository customerRepository){
+    public TransactionController(TransactionRepository transactionRepository, ProductRepository productRepository, UserRepository customerRepository){
         this.transactionRepository = transactionRepository;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
@@ -39,9 +41,9 @@ public class OrderController {
     // Type of order to replace standard order entity with unsafe information
     public record SafeTransaction(
             Integer transaction_id,
-            Product product,
+            List<Product> product,
             SafeUser user,
-            Integer quantity,
+            Integer[] quantities,
             String status
     ){}
 
@@ -54,7 +56,7 @@ public class OrderController {
         for(Transaction transaction : transactions){
             User user = transaction.getUser_id();
             SafeUser safeUser = new SafeUser(user.getUser_id(), user.getName(), user.getEmail(), user.getAge());
-            SafeTransaction safeTransaction = new SafeTransaction(transaction.getTransaction_id(), transaction.getProduct(), safeUser, transaction.getQuantity(), transaction.getStatus());
+            SafeTransaction safeTransaction = new SafeTransaction(transaction.getTransaction_id(), transaction.getProducts(), safeUser, transaction.getQuantities(), transaction.getStatus());
             safeTransactions.add(safeTransaction);
         }
 
@@ -73,12 +75,25 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<String> addOrder(@RequestBody OrderDto order){
+    public ResponseEntity<String> addOrder(@RequestBody OrderDto orders){
+        Product[] products = new Product[orders.product_ids.length];
+        int count = 0;
+        for(int id: orders.product_ids){
+            products[count++] = this.productRepository.getReferenceById(id);
+        }
+
         // implement logic here
         Transaction newTransaction = new Transaction();
-        newTransaction.setProduct(this.productRepository.getReferenceById(order.item_id));
-        newTransaction.setUser_id(this.customerRepository.findById(order.user_id).get());
-        newTransaction.setQuantity(order.quantity);
+        newTransaction.setProducts(Arrays.asList(products));
+        Optional<User> user = this.customerRepository.findByEmail(orders.user_email);
+        if(user.isPresent()){
+            newTransaction.setUser_id(user.get());
+        }
+        else{
+            return new ResponseEntity<>("User not logged in", HttpStatus.UNAUTHORIZED);
+        }
+
+        newTransaction.setQuantities(orders.quantities);
         newTransaction.setStatus("Order received");
 
 
