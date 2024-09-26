@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.shop.online_shop.entities.Product;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,8 @@ public class ProductController {
     public record NewProductRequest(
             String item_name,
             String description,
-            Double price
+            Double price,
+            String image_url
     ){}
 
     @PostMapping
@@ -31,6 +33,7 @@ public class ProductController {
         newProduct.setItem_name(request.item_name);
         newProduct.setDescription(request.description);
         newProduct.setPrice(request.price);
+        newProduct.setImage_url(request.image_url);
 
         this.productRepository.save(newProduct);
         //TODO add response entity to all responses
@@ -46,6 +49,28 @@ public class ProductController {
         // implement logic here
         Optional<Product> product = this.productRepository.findById(id);
         return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(path="count")
+    public ResponseEntity<Integer> getCount(){
+        int count = this.productRepository.findAll().size();
+
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
+
+    @GetMapping(path="search")
+    public ResponseEntity<List<Product>> productSearch(@RequestParam("keyword") String keyword){
+        List<Product> allProducts = this.productRepository.findAll();
+        List<Product> matchingProducts = new ArrayList<>();
+
+        for(Product product: allProducts){
+            if(product.getItem_name().contains(keyword)){
+                matchingProducts.add(product);
+            }
+        }
+
+
+        return new ResponseEntity<>(matchingProducts, HttpStatus.OK);
     }
 
     public record UpdateRequest(
