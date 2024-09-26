@@ -69,7 +69,6 @@ public class ProductController {
             }
         }
 
-
         return new ResponseEntity<>(matchingProducts, HttpStatus.OK);
     }
 
@@ -90,8 +89,15 @@ public class ProductController {
     }
 
     @DeleteMapping(path="{product_id}")
-    public ResponseEntity deleteProduct(@PathVariable("product_id") String id){
+    public ResponseEntity<String> deleteProduct(@PathVariable("product_id") int id){
         // implement logic here
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
+        Optional<Product> toDelete = this.productRepository.findById(id);
+
+        if(toDelete.isEmpty()){
+            return new ResponseEntity<>("Product with id '" + id + "' not found", HttpStatus.NOT_FOUND);
+        }
+
+        this.productRepository.delete(toDelete.get());
+        return new ResponseEntity<>("Successfully deleted product", HttpStatus.OK);
     }
 }

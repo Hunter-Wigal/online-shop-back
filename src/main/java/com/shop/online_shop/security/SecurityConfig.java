@@ -49,33 +49,37 @@ public class SecurityConfig {
 
                 // Determine who is authorized at which endpoints
                 .authorizeHttpRequests(authorize -> authorize
-                        // Only allow posting at this route. Used for logging in and registering
-                        .requestMatchers(HttpMethod.POST,"/api/v1/auth/**").permitAll()
-                        // Allow requesting user information if logged in
-                        .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
-                        // Allow anyone to view products
-                        .requestMatchers(HttpMethod.GET,"api/v1/products/**").permitAll()
-                        // Only allow admin to post to products api
-                        .requestMatchers(HttpMethod.POST,"api/v1/products/**").permitAll() //.hasRole("ADMIN")
-                        // Change to only admin
-                        .requestMatchers(HttpMethod.PATCH, "api/v1/products/**").permitAll()
-                        // Once tested, change to only allow admin to get order
-                        .requestMatchers(HttpMethod.GET, "api/v1/orders/**").permitAll()
+                                // Only allow posting at this route. Used for logging in and registering
+                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
+                                // Allow requesting user information if logged in
+                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
+                                // Allow anyone to view products
+                                .requestMatchers(HttpMethod.GET, "api/v1/products/**").permitAll()
+                                // Only allow admin to post to products api
+                                .requestMatchers(HttpMethod.POST, "api/v1/products/**").permitAll() //.hasRole("ADMIN")
+                                // Change to only admin
+                                .requestMatchers(HttpMethod.PATCH, "api/v1/products/**").permitAll()
+
+                                .requestMatchers(HttpMethod.DELETE, "api/v1/products").permitAll()
+                                // Once tested, change to only allow admin to get order
+                                .requestMatchers(HttpMethod.GET, "api/v1/orders/**").permitAll()
+
 //                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").authenticated()
-                        // Temporary let every other request work
-                        .anyRequest().permitAll()
+                                // Temporary let every other request work
+                                .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults())
                 .csrf((csrf) -> csrf
-                        // TODO figure out why this isn't working
-                        // TODO add proper csrf protection
+                                // TODO figure out why this isn't working
+                                // TODO add proper csrf protection
 //                        .ignoringRequestMatchers("/api/v1/auth/**")
 
                                 .disable()
 //                        .ignoringRequestMatchers("http://localhost:5173/**")
                 )
                 // Cors defined below
-                .cors((cors)->{})
+                .cors((cors) -> {
+                })
                 // Handle exceptions elsewhere
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -86,10 +90,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
 
 
     @Bean
@@ -99,12 +102,12 @@ public class SecurityConfig {
         // Allow requests from local react app
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         // only allow these methods and headers
-        configuration.setAllowedMethods(List.of("GET","POST", "PUT", "PATCH"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type", "Method", "Accept"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Method", "Accept"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**",configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
