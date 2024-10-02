@@ -1,6 +1,8 @@
 package com.shop.online_shop.controllers;
 
+import com.shop.online_shop.entities.Product;
 import com.shop.online_shop.entities.User;
+import com.shop.online_shop.repositories.ProductRepository;
 import com.shop.online_shop.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +16,11 @@ import java.util.Optional;
 @RequestMapping("api/v1/user")
 public class UserController {
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
-    public UserController(UserRepository userRepository){
+    public UserController(UserRepository userRepository, ProductRepository productRepository){
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
     }
 
     @GetMapping("/")
@@ -98,4 +102,70 @@ public class UserController {
         return new ResponseEntity(false, HttpStatus.NOT_IMPLEMENTED);
     }
 
+    public record CartRequest(
+            int product_id,
+            int quantity
+    ){}
+
+    @PostMapping("{username}/cart")
+    public ResponseEntity<Boolean> addToCart(@PathVariable("username") String username, @RequestBody CartRequest request){
+        Optional<User> user = this.userRepository.findByEmail(username);
+
+        if(user.isEmpty()){
+            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+        }
+
+        List<Product> cart = user.get().getCart();
+        cart.add(productRepository.getReferenceById(request.product_id));
+        user.get().setCart(cart);
+
+        List<Integer> cartQuantities = user.get().getCartItemQuantities();
+        cartQuantities.add(request.quantity());
+        user.get().setCartItemQuantities(cartQuantities);
+
+        this.userRepository.save(user.get());
+        return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+    public record Cart(
+            List<Product> products,
+            List<Integer> quantities
+    ){}
+    @GetMapping("{username}/cart")
+    public ResponseEntity<Cart> getCart(@PathVariable String username){
+
+        Optional<User> user = this.userRepository.findByEmail(username);
+
+        if(user.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Cart cart = new Cart(user.get().getCart(), user.get().getCartItemQuantities());
+
+        return new ResponseEntity<>(cart, HttpStatus.OK);
+    }
+
+    @DeleteMapping("{username}/cart/{index}")
+    public ResponseEntity<Boolean> deleteFromCart(@PathVariable String username, @PathVariable int index){
+        Optional<User> user = this.userRepository.findByEmail(username);
+
+        if(user.isEmpty()){
+            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+        }
+
+        List<Product> cart = user.get().getCart();
+        List<Integer> quantities = user.get().getCartItemQuantities();
+
+        if(index > cart.size() || index < 0){
+            return new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
+        }
+
+        cart.remove(index);
+        quantities.remove(index);
+
+        user.get().setCart(cart);
+        user.get().setCartItemQuantities(quantities);
+        this.userRepository.save(user.get());
+        return new ResponseEntity<>(true, HttpStatus.OK);
+    }
 }

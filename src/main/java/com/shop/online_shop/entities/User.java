@@ -34,6 +34,13 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Roles> roles = new ArrayList<>();
 
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name="user_cart", joinColumns = @JoinColumn(name="user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id", referencedColumnName = "product_id"))
+    private List<Product> cart;
+    private List<Integer> cartItemQuantities = new ArrayList<>();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -52,7 +52,7 @@ public class SecurityConfig {
                                 // Only allow posting at this route. Used for logging in and registering
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                                 // Allow requesting user information if logged in
-                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**").permitAll()//.authenticated()
                                 // Allow anyone to view products
                                 .requestMatchers(HttpMethod.GET, "api/v1/products/**").permitAll()
                                 // Only allow admin to post to products api
