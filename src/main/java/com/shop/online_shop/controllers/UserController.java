@@ -76,7 +76,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    //TODO change this to a patch mapping with a pathvariable for the username
+    //TODO change this to a patch mapping with a path variable for the username
     @PutMapping("user")
     public ResponseEntity<String> updateUser(@RequestBody NewUserRequest request){
         Optional<User> check = this.userRepository.findByEmail(request.email());
@@ -99,7 +99,7 @@ public class UserController {
     public ResponseEntity<Boolean> delete(@PathVariable("username") String username){
         // implement logic here
         System.out.println(username);
-        return new ResponseEntity(false, HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(false, HttpStatus.NOT_IMPLEMENTED);
     }
 
     public record CartRequest(

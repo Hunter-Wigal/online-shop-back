@@ -11,7 +11,6 @@ import java.util.Objects;
 
 @Entity
 
-//TODO test what this does
 
 @Data
 @NoArgsConstructor
@@ -29,19 +28,21 @@ public class Transaction {
     )
     private Integer transaction_id;
 
-    // Change to be a list of products
+    // Joins the provided product with a row in the product table
     @ManyToMany(targetEntity = Product.class, cascade = CascadeType.ALL)
     @JoinTable(
-            name = "transaction_products", // This is the join table
+            name = "transaction_products",
             joinColumns = @JoinColumn(name = "transaction_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private List<Product> products;
 
+    // Joins the provided user_id with a user from the user table
     @ManyToOne(targetEntity = User.class, cascade = CascadeType.ALL)
     @JoinColumn(name="user_id", referencedColumnName = "user_id")
     private User user_id;
 
+    // Array of quantities, used to determine what quantity of which product in the transaction
     private Integer[] quantities;
     private String status;
 
@@ -62,7 +63,7 @@ public class Transaction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction transaction = (Transaction) o;
-        return Objects.equals(transaction_id, transaction.transaction_id) && Objects.equals(products, transaction.products) && Objects.equals(user_id, transaction.user_id) && Objects.equals(quantities, transaction.quantities) && Objects.equals(status, transaction.status);
+        return Objects.equals(transaction_id, transaction.transaction_id) && Objects.equals(products, transaction.products) && Objects.equals(user_id, transaction.user_id) && Arrays.equals(quantities, transaction.quantities) && Objects.equals(status, transaction.status);
     }
 
     @Override

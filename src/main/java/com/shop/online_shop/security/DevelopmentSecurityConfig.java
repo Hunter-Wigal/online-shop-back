@@ -3,10 +3,10 @@ package com.shop.online_shop.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+// The following configuration is not actually used anymore and is just kept as a reference
 
 @Configuration
 @Profile("!development")

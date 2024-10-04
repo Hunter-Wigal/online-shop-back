@@ -42,7 +42,7 @@ public class AuthController {
 
 
 
-    // TODO move the dtos
+    // TODO move the dtos / records from all controllers
 
     public record LoginDto(
             String email,
@@ -98,7 +98,6 @@ public class AuthController {
 
     @GetMapping("valid")
     public ResponseEntity<Boolean> valid(){
-        // implement logic here
         Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
         SimpleGrantedAuthority user = new SimpleGrantedAuthority(roleRepository.findByName("USER").get().getName());
         try {

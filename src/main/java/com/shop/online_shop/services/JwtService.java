@@ -16,11 +16,14 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    // Will be changed in the future to not be a hardcoded string
     private static final String SECRET_KEY = "p39JkaOJMTkrtoyoHxjXgddQMCad8YbU";
 
+    // Extract functions decodes the jwt to get stored info
     public String extractUsername(String token){
         return extractClaim(token, Claims::getSubject);
     }
+
 
     public <T>T extractClaim(String token, Function<Claims, T> claimsResolver){
         final Claims claims = extractAllClaims(token);
@@ -34,9 +37,11 @@ public class JwtService {
                                 UserDetails userDetails
     ){
         return Jwts.builder()
+                //TODO use non-deprecated functions
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
+                // Expiration date is 24 hours from the time the token was generated
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
