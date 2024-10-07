@@ -9,7 +9,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 // The following configuration is not actually used anymore and is just kept as a reference
 
 @Configuration
-@Profile("!development")
+@Profile("development")
 //@EnableWebSecurity
 //public class DevelopmentSecurityConfig {
 
