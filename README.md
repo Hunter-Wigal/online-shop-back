@@ -1,0 +1,5 @@
+# Overview
+This repository contains code that works with the online-shop-front repository to work as a sample e-commerce application. The application is designed to allow users to create accounts and place orders on products that are available for purchasing. These products are managed by the admin of the shop, who has the ability to add, edit, or remove them. The admin is also able to view and manage orders placed by a user in order to fulfill them. This project is a work in progress and is meant to display my experience working with Spring Boot in Java.
+
+# Code
+This project uses code written in Java and utilizes Spring Boot to work as a back-end. Spring Boot is utilized to create a REST API style interface for the front-end to send and receive data from. This part of the application interacts with a Postgres database in order to store data such as products added by the admin, customer information, and orders placed. It also handles security such as authenticating user requests and generating JSON Web Tokens (JWT) and validating them to prove identity.
