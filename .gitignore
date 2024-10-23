@@ -33,3 +33,5 @@ build/
 .vscode/
 
 SecurityConstants.java
+
+.env

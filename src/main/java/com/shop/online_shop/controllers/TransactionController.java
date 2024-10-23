@@ -49,7 +49,6 @@ public class TransactionController {
 
     @GetMapping
     public ResponseEntity<List<SafeTransaction>> getTransactions(){
-        // implement logic here
         List<Transaction> transactions = this.transactionRepository.findAll();
         List<SafeTransaction> safeTransactions = new ArrayList<>();
 
@@ -63,16 +62,6 @@ public class TransactionController {
         return new ResponseEntity<>(safeTransactions, HttpStatus.OK);
     }
 
-    private record Customer(String name){}
-    public record tempOrderDto(String itemName, float price, int quantity, Customer customer) {
-    }
-
-    @GetMapping("orders")
-    public ResponseEntity<List<tempOrderDto>>getOrders(){
-        List<tempOrderDto> orderDtos = new ArrayList<>();
-
-        return new ResponseEntity<>(orderDtos, HttpStatus.OK);
-    }
 
     @PostMapping
     public ResponseEntity<String> addOrder(@RequestBody OrderDto orders){
@@ -82,7 +71,6 @@ public class TransactionController {
             products[count++] = this.productRepository.getReferenceById(id);
         }
 
-        // implement logic here
         Transaction newTransaction = new Transaction();
         newTransaction.setProducts(Arrays.asList(products));
         Optional<User> user = this.customerRepository.findByEmail(orders.user_email);
@@ -109,10 +97,17 @@ public class TransactionController {
     }
 
     @PatchMapping(path="{transaction_id}")
-    public ResponseEntity<Object> updateOrder(@PathVariable("transaction_id") String id){
-        // implement logic here
-        System.out.println(id);
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Object> updateOrder(@PathVariable("transaction_id") int id, SafeTransaction transaction){
+        Transaction toUpdate = this.transactionRepository.getReferenceById(id);
+
+        // Assume toUpdate exists
+        toUpdate.setProducts(transaction.product);
+        toUpdate.setQuantities(transaction.quantities);
+        toUpdate.setStatus(transaction.status);
+
+        this.transactionRepository.save(toUpdate);
+
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -124,6 +125,22 @@ public class UserController {
         user.get().setCartItemQuantities(cartQuantities);
 
         this.userRepository.save(user.get());
+        return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+    @DeleteMapping("{username}/cart")
+    public ResponseEntity<Boolean> clearCart(@PathVariable String username){
+        // Change to make sure that only the owner of the account can clear the cart
+        Optional<User> user = this.userRepository.findByEmail(username);
+        if(user.isEmpty()){
+            return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+        }
+
+        user.get().setCartItemQuantities(new ArrayList<>());
+        user.get().setCart(new ArrayList<>());
+
+        this.userRepository.save(user.get());
+
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
