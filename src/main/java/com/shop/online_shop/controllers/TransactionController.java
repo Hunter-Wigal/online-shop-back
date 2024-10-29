@@ -41,7 +41,7 @@ public class TransactionController {
     // Type of order to replace standard order entity with unsafe information
     public record SafeTransaction(
             Integer transaction_id,
-            List<Product> product,
+            List<Product> products,
             SafeUser user,
             Integer[] quantities,
             String status
@@ -90,24 +90,51 @@ public class TransactionController {
     }
 
     @GetMapping(path="{transaction_id}")
-    public ResponseEntity<Transaction> getOrder(@PathVariable("transaction_id") int id){
+    public ResponseEntity<Transaction> getTransaction(@PathVariable("transaction_id") int id){
         // implement logic for not found orders
-        return new ResponseEntity<>(this.transactionRepository.getReferenceById(id), HttpStatus.OK);
+        Optional<Transaction> transaction = this.transactionRepository.findById(id);
+
+        if(transaction.isEmpty()){
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(transaction.get(), HttpStatus.OK);
 
     }
 
     @PatchMapping(path="{transaction_id}")
-    public ResponseEntity<Object> updateOrder(@PathVariable("transaction_id") int id, SafeTransaction transaction){
+    public ResponseEntity<Object> updateTransaction(@PathVariable("transaction_id") int id, SafeTransaction transaction){
         Transaction toUpdate = this.transactionRepository.getReferenceById(id);
 
         // Assume toUpdate exists
-        toUpdate.setProducts(transaction.product);
+        toUpdate.setProducts(transaction.products);
         toUpdate.setQuantities(transaction.quantities);
         toUpdate.setStatus(transaction.status);
 
         this.transactionRepository.save(toUpdate);
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+
+    @DeleteMapping(path="{transaction_id}")
+    public ResponseEntity<Boolean> deleteTransaction(@PathVariable("transaction_id") int transaction_id){
+        Optional<Transaction> toDelete = this.transactionRepository.findById(transaction_id);
+
+        if(toDelete.isEmpty()){
+            return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+        }
+
+        this.transactionRepository.delete(toDelete.get());
+        return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+    @PatchMapping(path="{transaction_id}/status")
+    public ResponseEntity<Boolean> updateStatus(@PathVariable("transaction_id") int transaction_id){
+
+
+
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
 
