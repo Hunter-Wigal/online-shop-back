@@ -21,7 +21,7 @@ public class JWTGenerator {
     public String generateToken(Authentication authentication){
         String username = authentication.getName();
         Date currentDate = new Date();
-        Date expirationDate = new Date(currentDate.getTime() + SecurityConstants.JWT_EXPIRATION);
+        Date expirationDate = new Date(currentDate.getTime() + System.getenv("JWT_EXPIRATION"));
 
         Collection<? extends GrantedAuthority> roles = authentication.getAuthorities();
 
@@ -54,7 +54,7 @@ public class JWTGenerator {
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SecurityConstants.JWT_SECRET);
+        byte[] keyBytes = Decoders.BASE64.decode(System.getenv("JWT_SECRET"));
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
