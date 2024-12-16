@@ -4,6 +4,7 @@ services:
     environment:
 #      POSTGRES_DB: mydatabase
       POSTGRES_PASSWORD: password # change / remove for actual implementation
+      # TODO change from hunter to postgres
       POSTGRES_USER: hunter
       PGDATA: /data/postgres
 

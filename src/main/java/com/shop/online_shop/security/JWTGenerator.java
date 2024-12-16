@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,12 +17,18 @@ import java.util.function.Function;
 
 @Component
 public class JWTGenerator {
+    @Value("${JWT_EXPIRATION}")
+    int expiration;
+
+    @Value("${JWT_SECRET}")
+    String jwt_secret;
 
     // Create new token
     public String generateToken(Authentication authentication){
         String username = authentication.getName();
         Date currentDate = new Date();
-        Date expirationDate = new Date(currentDate.getTime() + System.getenv("JWT_EXPIRATION"));
+
+        Date expirationDate = new Date(currentDate.getTime() + expiration);
 
         Collection<? extends GrantedAuthority> roles = authentication.getAuthorities();
 
@@ -54,7 +61,7 @@ public class JWTGenerator {
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(System.getenv("JWT_SECRET"));
+        byte[] keyBytes = Decoders.BASE64.decode(jwt_secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

@@ -28,7 +28,7 @@ public class ProductController {
     ){}
 
     @PostMapping
-    public void addProduct(@RequestBody ProductController.NewProductRequest request){
+    public void addProduct(@RequestBody NewProductRequest request){
         Product newProduct = new Product();
         newProduct.setItem_name(request.item_name);
         newProduct.setDescription(request.description);

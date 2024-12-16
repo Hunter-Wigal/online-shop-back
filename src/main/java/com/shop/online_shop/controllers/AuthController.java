@@ -41,17 +41,17 @@ public class AuthController {
     }
 
 
-
     // TODO move the dtos / records from all controllers
 
     public record LoginDto(
             String email,
             String password
-    ){}
+    ) {
+    }
 
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestBody RegisterDto request){
-        if(userRepository.existsByEmail(request.email)){
+    public ResponseEntity<String> register(@RequestBody RegisterDto request) {
+        if (userRepository.existsByEmail(request.email)) {
             return new ResponseEntity<>("Username is taken", HttpStatus.BAD_REQUEST);
         }
 
@@ -69,15 +69,14 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto request){
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto request) {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email, request.password)
             );
-        }
-        catch(Exception e){
-            return new ResponseEntity<>(new AuthResponseDto(null,"Username or password is incorrect"), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new AuthResponseDto(null, "Username or password is incorrect"), HttpStatus.UNAUTHORIZED);
         }
         // Set current context to auth provided by logging in
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -90,14 +89,14 @@ public class AuthController {
     }
 
     @PostMapping("logout")
-    public ResponseEntity<String> logout(){
+    public ResponseEntity<String> logout() {
         SecurityContextHolder.clearContext();
 
         return new ResponseEntity<>("Successfully logged out", HttpStatus.ACCEPTED);
     }
 
     @GetMapping("valid")
-    public ResponseEntity<Boolean> valid(){
+    public ResponseEntity<Boolean> valid() {
         Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
         SimpleGrantedAuthority user = new SimpleGrantedAuthority(roleRepository.findByName("USER").get().getName());
         try {
@@ -105,9 +104,17 @@ public class AuthController {
                 return new ResponseEntity<>(true, HttpStatus.OK);
             else
                 return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("admin_check")
+    public ResponseEntity<Boolean> isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean hasAdminRole = auth.getAuthorities().stream()
+                .anyMatch(r -> r.getAuthority().equals("ADMIN"));
+        return new ResponseEntity<>(hasAdminRole, HttpStatus.OK);
     }
 }
