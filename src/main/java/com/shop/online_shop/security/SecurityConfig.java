@@ -24,7 +24,6 @@ import java.util.List;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@Profile("!development")
 @EnableWebSecurity
 public class SecurityConfig {
 

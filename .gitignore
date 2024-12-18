@@ -36,3 +36,5 @@ SecurityConstants.java
 
 .env
 *.properties
+
+compose.yaml
