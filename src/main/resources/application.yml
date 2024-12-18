@@ -9,7 +9,7 @@ spring:
   jpa:
     hibernate:
 #      create-drop drops on close
-      ddl-auto: create-drop
+      ddl-auto: ${DB_SETTING}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
