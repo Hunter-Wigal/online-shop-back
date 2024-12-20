@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "${ALLOWED_ORIGINS}")
+//@CrossOrigin(origins = "${ALLOWED_ORIGINS}")
 @RequestMapping("api/v1/orders")
 public class TransactionController {
     private final TransactionRepository transactionRepository;

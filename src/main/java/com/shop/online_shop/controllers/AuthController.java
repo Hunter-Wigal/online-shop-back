@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 @RestController
-@CrossOrigin(origins = "${ALLOWED_ORIGINS}") //http://localhost:5173"
+//@CrossOrigin(origins = "${ALLOWED_ORIGINS}") //http://localhost:5173"
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
