@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${ALLOWED_ORIGINS}")
 @RequestMapping("api/v1/user")
 public class UserController {
     private final UserRepository userRepository;
