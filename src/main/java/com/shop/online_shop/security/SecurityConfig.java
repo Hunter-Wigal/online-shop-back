@@ -55,17 +55,17 @@ public class SecurityConfig {
                                 // Only allow posting at this route. Used for logging in and registering
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                                 // Allow requesting user information if logged in
-                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**").permitAll()//.authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
                                 // Allow anyone to view products
                                 .requestMatchers(HttpMethod.GET, "api/v1/products/**").permitAll()
                                 // Only allow admin to post to products api
-                                .requestMatchers(HttpMethod.POST, "api/v1/products/**").permitAll() //.hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "api/v1/products/**").hasRole("ADMIN")
                                 // Change to only admin
-                                .requestMatchers(HttpMethod.PATCH, "api/v1/products/**").permitAll()
+                                .requestMatchers(HttpMethod.PATCH, "api/v1/products/**").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.DELETE, "api/v1/products").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "api/v1/products").hasRole("ADMIN")
                                 // Once tested, change to only allow admin to get order
-                                .requestMatchers(HttpMethod.GET, "api/v1/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "api/v1/orders/**").hasRole("ADMIN")
 
 //                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").authenticated()
                                 // Temporary let every other request work
@@ -102,11 +102,11 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow requests from local react app
+        // Allow requests from specified origins
         configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
         // only allow these methods and headers
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Method", "Accept", "access-control-allow-origin"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Method", "Accept", "Access-Control-Allow-Origin"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
