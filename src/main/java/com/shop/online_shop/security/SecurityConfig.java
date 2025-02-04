@@ -47,9 +47,8 @@ public class SecurityConfig {
     // Configures security options such as specific route permissions, cors, and csrf
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        //                        .ignoringRequestMatchers("/api/v1/auth/**")
         http
-                .cors(AbstractHttpConfigurer::disable)
-
                 // Determine who is authorized at which endpoints
                 .authorizeHttpRequests(authorize -> authorize
                                 // Only allow posting at this route. Used for logging in and registering
@@ -72,17 +71,13 @@ public class SecurityConfig {
                                 .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults())
-                .csrf((csrf) -> csrf
-                                // TODO figure out why this isn't working
-                                // TODO add proper csrf protection
-//                        .ignoringRequestMatchers("/api/v1/auth/**")
-
-                                .disable()
+                // TODO figure out why this isn't working
+                // TODO add proper csrf protection
+                .csrf(AbstractHttpConfigurer::disable
 //                        .ignoringRequestMatchers("http://localhost:5173/**")
                 )
                 // Cors defined below
-                .cors((cors) -> {
-                })
+                .cors(AbstractHttpConfigurer::disable)
                 // Handle exceptions elsewhere
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -101,13 +96,13 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
+        System.out.println(allowedOrigins);
         // Allow requests from specified origins
         configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
         // only allow these methods and headers
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Method", "Accept", "Access-Control-Allow-Origin"));
-
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         source.registerCorsConfiguration("/**", configuration);
