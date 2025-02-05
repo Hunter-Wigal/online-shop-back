@@ -74,7 +74,9 @@ public class ProductController {
 
     public record UpdateRequest(
             String item_name,
-            String item_description
+            String item_description,
+            String imageURL,
+            Double price
     ){}
     @PatchMapping(path="{product_id}")
     public ResponseEntity<String> updateProduct(@PathVariable("product_id") String id, @RequestBody UpdateRequest request){
@@ -82,6 +84,8 @@ public class ProductController {
         Product product = this.productRepository.getReferenceById(Integer.parseInt(id));
         product.setItem_name(request.item_name);
         product.setDescription(request.item_description);
+        product.setImage_url(request.imageURL);
+        product.setPrice(request.price);
 
         this.productRepository.save(product);
 

@@ -75,9 +75,12 @@ public class SecurityConfig {
                 // TODO add proper csrf protection
                 .csrf(AbstractHttpConfigurer::disable
 //                        .ignoringRequestMatchers("http://localhost:5173/**")
+
                 )
                 // Cors defined below
-                .cors(AbstractHttpConfigurer::disable)
+                .cors((cors)->{
+                    cors.disable();
+                })
                 // Handle exceptions elsewhere
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -96,9 +99,10 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        System.out.println(allowedOrigins);
+
+        List<String> allowed = List.of(allowedOrigins.split(","));
         // Allow requests from specified origins
-        configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        configuration.setAllowedOrigins(allowed);
         // only allow these methods and headers
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Method", "Accept", "Access-Control-Allow-Origin"));
