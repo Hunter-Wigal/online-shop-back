@@ -78,9 +78,10 @@ public class SecurityConfig {
 
                 )
                 // Cors defined below
-                .cors((cors)->{
-                    cors.disable();
-                })
+//                .cors((cors)->{
+//                    cors.disable();
+//                })
+                .cors(withDefaults()) // Use corsConfigurationSource bean
                 // Handle exceptions elsewhere
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
