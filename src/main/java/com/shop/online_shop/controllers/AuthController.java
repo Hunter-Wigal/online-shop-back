@@ -1,7 +1,8 @@
 package com.shop.online_shop.controllers;
 
-import com.shop.online_shop.dto.AuthResponseDto;
-import com.shop.online_shop.dto.RegisterDto;
+import com.shop.online_shop.dto.auth.AuthResponseDto;
+import com.shop.online_shop.dto.auth.LoginDto;
+import com.shop.online_shop.dto.auth.RegisterDto;
 import com.shop.online_shop.entities.Roles;
 import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.RoleRepository;
@@ -40,14 +41,6 @@ public class AuthController {
         this.jwtGenerator = jwtGenerator;
     }
 
-
-    // TODO move the dtos / records from all controllers
-
-    public record LoginDto(
-            String email,
-            String password
-    ) {
-    }
 
     @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody RegisterDto request) {

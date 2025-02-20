@@ -1,6 +1,6 @@
 package com.shop.online_shop.controllers;
 
-import com.shop.online_shop.dto.OrderDto;
+import com.shop.online_shop.dto.transaction.TransactionDto;
 import com.shop.online_shop.entities.Transaction;
 import com.shop.online_shop.entities.Product;
 import com.shop.online_shop.entities.User;
@@ -64,7 +64,7 @@ public class TransactionController {
 
 
     @PostMapping
-    public ResponseEntity<String> addOrder(@RequestBody OrderDto orders){
+    public ResponseEntity<String> addOrder(@RequestBody TransactionDto orders){
         Product[] products = new Product[orders.product_ids.length];
         int count = 0;
         for(int id: orders.product_ids){

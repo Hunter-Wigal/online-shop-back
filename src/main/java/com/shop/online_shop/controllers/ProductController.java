@@ -1,5 +1,7 @@
 package com.shop.online_shop.controllers;
 
+import com.shop.online_shop.dto.product.NewProductDto;
+import com.shop.online_shop.dto.product.UpdateProductDto;
 import com.shop.online_shop.repositories.ProductRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,19 +18,12 @@ import java.util.Optional;
 public class ProductController {
     private final ProductRepository productRepository;
 
-    public ProductController(ProductRepository productRepository){
+    public ProductController(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
-    public record NewProductRequest(
-            String item_name,
-            String description,
-            Double price,
-            String image_url
-    ){}
-
     @PostMapping
-    public void addProduct(@RequestBody NewProductRequest request){
+    public void addProduct(@RequestBody NewProductDto request) {
         Product newProduct = new Product();
         newProduct.setItem_name(request.item_name);
         newProduct.setDescription(request.description);
@@ -40,31 +35,31 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAllProducts(){
+    public List<Product> getAllProducts() {
         return this.productRepository.findAll();
     }
 
-    @GetMapping(path="{product_id}")
-    public ResponseEntity<Product> getProduct(@PathVariable("product_id") int id){
+    @GetMapping(path = "{product_id}")
+    public ResponseEntity<Product> getProduct(@PathVariable("product_id") int id) {
         // implement logic here
         Optional<Product> product = this.productRepository.findById(id);
         return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping(path="count")
-    public ResponseEntity<Integer> getCount(){
+    @GetMapping(path = "count")
+    public ResponseEntity<Integer> getCount() {
         int count = this.productRepository.findAll().size();
 
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 
-    @GetMapping(path="search")
-    public ResponseEntity<List<Product>> productSearch(@RequestParam("keyword") String keyword){
+    @GetMapping(path = "search")
+    public ResponseEntity<List<Product>> productSearch(@RequestParam("keyword") String keyword) {
         List<Product> allProducts = this.productRepository.findAll();
         List<Product> matchingProducts = new ArrayList<>();
 
-        for(Product product: allProducts){
-            if(product.getItem_name().contains(keyword)){
+        for (Product product : allProducts) {
+            if (product.getItem_name().contains(keyword)) {
                 matchingProducts.add(product);
             }
         }
@@ -72,14 +67,8 @@ public class ProductController {
         return new ResponseEntity<>(matchingProducts, HttpStatus.OK);
     }
 
-    public record UpdateRequest(
-            String item_name,
-            String item_description,
-            String imageURL,
-            Double price
-    ){}
-    @PatchMapping(path="{product_id}")
-    public ResponseEntity<String> updateProduct(@PathVariable("product_id") String id, @RequestBody UpdateRequest request){
+    @PatchMapping(path = "{product_id}")
+    public ResponseEntity<String> updateProduct(@PathVariable("product_id") String id, @RequestBody UpdateProductDto request) {
         // implement logic here
         Product product = this.productRepository.getReferenceById(Integer.parseInt(id));
         product.setItem_name(request.item_name);
@@ -89,15 +78,15 @@ public class ProductController {
 
         this.productRepository.save(product);
 
-        return new ResponseEntity<>("Successfully updated",HttpStatus.OK);
+        return new ResponseEntity<>("Successfully updated", HttpStatus.OK);
     }
 
-    @DeleteMapping(path="{product_id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("product_id") int id){
+    @DeleteMapping(path = "{product_id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable("product_id") int id) {
         // implement logic here
         Optional<Product> toDelete = this.productRepository.findById(id);
 
-        if(toDelete.isEmpty()){
+        if (toDelete.isEmpty()) {
             return new ResponseEntity<>("Product with id '" + id + "' not found", HttpStatus.NOT_FOUND);
         }
 

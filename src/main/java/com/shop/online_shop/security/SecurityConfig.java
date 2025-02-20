@@ -65,6 +65,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "api/v1/products").hasRole("ADMIN")
                                 // Once tested, change to only allow admin to get order
                                 .requestMatchers(HttpMethod.GET, "api/v1/orders/**").hasRole("ADMIN")
+                                .requestMatchers("/actuator/**").permitAll()
 
 //                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").authenticated()
                                 // Temporary let every other request work

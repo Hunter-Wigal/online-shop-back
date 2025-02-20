@@ -1,5 +1,9 @@
 package com.shop.online_shop.controllers;
 
+import com.shop.online_shop.dto.user.CartAddDto;
+import com.shop.online_shop.dto.user.CartGetDto;
+import com.shop.online_shop.dto.user.NewUserDto;
+import com.shop.online_shop.dto.user.UserGetDto;
 import com.shop.online_shop.entities.Product;
 import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.ProductRepository;
@@ -29,35 +33,27 @@ public class UserController {
         return this.userRepository.findAll();
     }
 
-    public record NewUserRequest(
-            String name,
-            String email,
-            Integer age
-    ){}
+
     @PostMapping
-    public void addUser(@RequestBody NewUserRequest request){
+    public void addUser(@RequestBody NewUserDto request){
         User user = new User();
-        user.setName(request.name());
-        user.setEmail(request.email());
-        user.setAge(request.age());
+        user.setName(request.name);
+        user.setEmail(request.email);
+        user.setAge(request.age);
 
         this.userRepository.save(user);
     }
 
-    public record UserResponse(
-            String email,
-            String name,
-            Integer age
-    ){}
+
 
     // TODO make this use body instead of param
     @GetMapping("user")
-    public ResponseEntity<UserResponse> getUser(@RequestParam("username") String username){
+    public ResponseEntity<UserGetDto> getUser(@RequestParam("username") String username){
         Optional<User> check = this.userRepository.findByEmail(username);
 
-        UserResponse response;
+        UserGetDto response;
         if(check.isPresent()){
-            response = new UserResponse(check.get().getEmail(), check.get().getName(), check.get().getAge());
+            response = new UserGetDto(check.get().getEmail(), check.get().getName(), check.get().getAge());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
@@ -65,12 +61,12 @@ public class UserController {
     }
 
     @GetMapping("user_id")
-    public ResponseEntity<UserResponse> getUser(@RequestBody Integer id){
+    public ResponseEntity<UserGetDto> getUser(@RequestBody Integer id){
         Optional<User> check = this.userRepository.findById(id);
 
-        UserResponse response;
+        UserGetDto response;
         if(check.isPresent()){
-            response = new UserResponse(check.get().getEmail(), check.get().getName(), check.get().getAge());
+            response = new UserGetDto(check.get().getEmail(), check.get().getName(), check.get().getAge());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
@@ -79,18 +75,18 @@ public class UserController {
 
     //TODO change this to a patch mapping with a path variable for the username
     @PutMapping("user")
-    public ResponseEntity<String> updateUser(@RequestBody NewUserRequest request){
-        Optional<User> check = this.userRepository.findByEmail(request.email());
+    public ResponseEntity<String> updateUser(@RequestBody NewUserDto request){
+        Optional<User> check = this.userRepository.findByEmail(request.email);
 
         if(check.isEmpty()){
             return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
         }
         User user = check.get();
-        if(request.age() != null){
-            user.setAge(request.age());
+        if(request.age != null){
+            user.setAge(request.age);
         }
-        if(request.name() != null){
-            user.setName(request.name());
+        if(request.name != null){
+            user.setName(request.name);
         }
         this.userRepository.save(user);
         return new ResponseEntity<>("Successfully updated user", HttpStatus.OK);
@@ -103,13 +99,9 @@ public class UserController {
         return new ResponseEntity<>(false, HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public record CartRequest(
-            int product_id,
-            int quantity
-    ){}
 
     @PostMapping("{username}/cart")
-    public ResponseEntity<Boolean> addToCart(@PathVariable("username") String username, @RequestBody CartRequest request){
+    public ResponseEntity<Boolean> addToCart(@PathVariable("username") String username, @RequestBody CartAddDto request){
         Optional<User> user = this.userRepository.findByEmail(username);
 
         if(user.isEmpty()){
@@ -121,7 +113,7 @@ public class UserController {
         user.get().setCart(cart);
 
         List<Integer> cartQuantities = user.get().getCartItemQuantities();
-        cartQuantities.add(request.quantity());
+        cartQuantities.add(request.quantity);
         user.get().setCartItemQuantities(cartQuantities);
 
         this.userRepository.save(user.get());
@@ -144,12 +136,9 @@ public class UserController {
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-    public record Cart(
-            List<Product> products,
-            List<Integer> quantities
-    ){}
+
     @GetMapping("{username}/cart")
-    public ResponseEntity<Cart> getCart(@PathVariable String username){
+    public ResponseEntity<CartGetDto> getCart(@PathVariable String username){
 
         Optional<User> user = this.userRepository.findByEmail(username);
 
@@ -157,9 +146,9 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        Cart cart = new Cart(user.get().getCart(), user.get().getCartItemQuantities());
+        CartGetDto cartGetDto = new CartGetDto(user.get().getCart(), user.get().getCartItemQuantities());
 
-        return new ResponseEntity<>(cart, HttpStatus.OK);
+        return new ResponseEntity<>(cartGetDto, HttpStatus.OK);
     }
 
     @DeleteMapping("{username}/cart/{index}")
