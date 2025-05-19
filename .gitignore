@@ -38,3 +38,5 @@ SecurityConstants.java
 *.properties
 
 compose.yaml
+
+Dockerfile
