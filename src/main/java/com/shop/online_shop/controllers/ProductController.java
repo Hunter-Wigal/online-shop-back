@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-//@CrossOrigin(origins = "${ALLOWED_ORIGINS}")
 @RequestMapping("/api/v1/products")
 public class ProductController {
     private final ProductRepository productRepository;
