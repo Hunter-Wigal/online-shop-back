@@ -1,4 +1,4 @@
-INSERT INTO roles (name) VALUES ('ADMIN'), ('USER');
+INSERT INTO roles (name) VALUES ('USER'), ('ADMIN');
 
 INSERT INTO products (product_id, item_name, description, price, image_url) VALUES (1000, 'New item', 'Cool description', 60.00, 'https://picsum.photos/300?random=1');
 

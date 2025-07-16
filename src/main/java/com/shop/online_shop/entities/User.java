@@ -41,6 +41,7 @@ public class User {
     private List<Product> cart;
     private List<Integer> cartItemQuantities = new ArrayList<>();
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

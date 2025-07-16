@@ -58,7 +58,7 @@ public class ProductController {
         List<Product> matchingProducts = new ArrayList<>();
 
         for (Product product : allProducts) {
-            if (product.getItem_name().contains(keyword)) {
+            if (product.getItem_name().toLowerCase().contains(keyword.toLowerCase()) || product.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
                 matchingProducts.add(product);
             }
         }
