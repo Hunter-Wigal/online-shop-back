@@ -41,6 +41,10 @@ public class User {
     private List<Product> cart;
     private List<Integer> cartItemQuantities = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name="user_id")
+    private List<Address> addresses = new ArrayList<>();
+
 
     @Override
     public boolean equals(Object o) {

@@ -1,19 +1,21 @@
 package com.shop.online_shop.controllers;
 
-import com.shop.online_shop.dto.user.CartAddDto;
-import com.shop.online_shop.dto.user.CartGetDto;
-import com.shop.online_shop.dto.user.NewUserDto;
-import com.shop.online_shop.dto.user.UserGetDto;
+import com.shop.online_shop.dto.user.*;
+import com.shop.online_shop.entities.Address;
 import com.shop.online_shop.entities.Product;
 import com.shop.online_shop.entities.User;
+import com.shop.online_shop.repositories.AddressRepository;
 import com.shop.online_shop.repositories.ProductRepository;
 import com.shop.online_shop.repositories.UserRepository;
+import com.shop.online_shop.services.JwtService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -22,10 +24,14 @@ import java.util.Optional;
 public class UserController {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final AddressRepository addressRepository;
+    @Autowired
+    private JwtService jwtService;
 
-    public UserController(UserRepository userRepository, ProductRepository productRepository){
+    public UserController(UserRepository userRepository, ProductRepository productRepository, AddressRepository addressRepository){
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.addressRepository = addressRepository;
     }
 
     @GetMapping("/")
@@ -173,5 +179,63 @@ public class UserController {
         user.get().setCartItemQuantities(quantities);
         this.userRepository.save(user.get());
         return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+
+    @GetMapping("{username}/address")
+    public ResponseEntity<List<Address>> getUserAddress(@PathVariable String username, @RequestHeader (name="Authorization") String token){
+        // Need to make sure requesting user has the username provided
+
+        Optional<User> user = this.userRepository.findByEmail(username);
+
+        if (user.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if(!Objects.equals(user.get().getEmail(), jwtService.extractUsername(token.split(" ")[1]))){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(user.get().getAddresses(), HttpStatus.OK);
+    }
+
+
+
+    @PostMapping("{username}/address")
+    public ResponseEntity<Boolean> addUserAddress(@PathVariable String username,@RequestBody NewUserAddressDto newAddressRequest,
+                                                  @RequestHeader (name="Authorization") String token){
+        // Need to make sure requesting user has the username provided
+
+        Optional<User> user = this.userRepository.findByEmail(username);
+
+        if (user.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if(!Objects.equals(user.get().getEmail(), jwtService.extractUsername(token.split(" ")[1]))){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Address newAddress = getAddress(newAddressRequest, user);
+
+        addressRepository.save(newAddress);
+
+
+        return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+    private static Address getAddress(NewUserAddressDto newAddressRequest, Optional<User> user) {
+        Address newAddress = new Address();
+
+        newAddress.setStreet_address(newAddressRequest.street);
+        newAddress.setSecondary_street(newAddressRequest.secondary_street);
+        newAddress.setCity(newAddressRequest.city);
+        newAddress.setState(newAddressRequest.state);
+        newAddress.setCountry(newAddressRequest.country);
+        newAddress.setZip_code(newAddressRequest.zip_code);
+
+        newAddress.setUser_id(user.get().getUser_id());
+        // TODO Make only one address default at a time
+        newAddress.setDefault_switch(true);
+        return newAddress;
     }
 }

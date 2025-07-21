@@ -54,6 +54,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                                 // Allow requesting user information if logged in
                                 .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
+                                // TODO need to make sure users can only view their address
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/address").authenticated()
                                 // Allow anyone to view products
                                 .requestMatchers(HttpMethod.GET, "api/v1/products/**").permitAll()
                                 // Only allow admin to post to products api
