@@ -7,7 +7,7 @@ import java.util.List;
 
 @AllArgsConstructor
 public class CartGetDto {
-    List<Product> products;
-    List<Integer> quantities;
+    public List<Product> products;
+    public List<Integer> quantities;
 
 }

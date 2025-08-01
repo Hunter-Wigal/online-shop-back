@@ -8,6 +8,9 @@ import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.RoleRepository;
 import com.shop.online_shop.repositories.UserRepository;
 import com.shop.online_shop.security.JWTGenerator;
+import jakarta.annotation.PostConstruct;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -39,6 +43,28 @@ public class AuthController {
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtGenerator = jwtGenerator;
+
+    }
+
+    @EventListener(ContextRefreshedEvent.class)
+    private void addTempUser(){
+        // TODO remove the temp user
+        RegisterDto testUser = new RegisterDto();
+        testUser.setEmail("test@gmail.com");
+        testUser.setPassword("password");
+
+        // Create new user and save to database
+        User user = new User();
+        user.setEmail(testUser.email);
+        user.setPassword(passwordEncoder.encode(testUser.password));
+        user.setAge(50);
+        user.setName("Test User");
+        user.setCart(new ArrayList<>());
+
+//        Roles roles = roleRepository.findByName("USER").get();
+//        user.setRoles(Collections.singletonList(roles));
+
+        userRepository.save(user);
     }
 
 

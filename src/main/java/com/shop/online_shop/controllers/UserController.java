@@ -152,7 +152,15 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        CartGetDto cartGetDto = new CartGetDto(user.get().getCart(), user.get().getCartItemQuantities());
+        List<Product> products = new ArrayList<>();
+        List<Integer> quantities = new ArrayList<>();
+
+        if(!user.get().getCart().isEmpty()){
+            products = user.get().getCart();
+            quantities = user.get().getCartItemQuantities();
+        }
+
+        CartGetDto cartGetDto = new CartGetDto(products, quantities);
 
         return new ResponseEntity<>(cartGetDto, HttpStatus.OK);
     }
