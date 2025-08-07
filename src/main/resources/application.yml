@@ -2,18 +2,36 @@ server:
   port: 8080
 
 spring:
-  datasource:
-    url: ${POSTGRES_URL}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+  application:
+    name: online-shop
+  profiles:
+    active: dev 
+
   jpa:
     hibernate:
 #      create-drop drops on close
-      ddl-auto: ${DB_SETTING}
+      ddl-auto: create-drop
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: "org.hibernate.dialect.PostgreSQLDialect"
         format_sql: true
       show-sql: true
   main:
     web-application-type: servlet
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+        - health
+        - info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    
+
+
+  
