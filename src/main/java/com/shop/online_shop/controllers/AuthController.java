@@ -22,9 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 @RestController
 //@CrossOrigin(origins = "${ALLOWED_ORIGINS}") //http://localhost:5173"
@@ -47,7 +45,7 @@ public class AuthController {
     }
 
     @EventListener(ContextRefreshedEvent.class)
-    private void addTempUser(){
+    private void addTempUser() {
         // TODO remove the temp user
         RegisterDto testUser = new RegisterDto();
         testUser.setEmail("test@gmail.com");
@@ -60,6 +58,7 @@ public class AuthController {
         user.setAge(50);
         user.setName("Test User");
         user.setCart(new ArrayList<>());
+
 
 //        Roles roles = roleRepository.findByName("USER").get();
 //        user.setRoles(Collections.singletonList(roles));
@@ -135,5 +134,20 @@ public class AuthController {
         boolean hasAdminRole = auth.getAuthorities().stream()
                 .anyMatch(r -> r.getAuthority().equals("ADMIN"));
         return new ResponseEntity<>(hasAdminRole, HttpStatus.OK);
+    }
+
+    @PostMapping("make_me_admin")
+    public ResponseEntity<Boolean> makeAdmin() {
+        Optional<User> maybeMe = this.userRepository.findByEmail("test@gmail.com");
+        if (maybeMe.isEmpty()) {
+            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+        }
+        User me = maybeMe.get();
+        Roles roles = this.roleRepository.findByName("ADMIN").get();
+        ArrayList<Roles> newRoles = new ArrayList<>();
+        newRoles.add(roles);
+        me.setRoles(newRoles);
+        this.userRepository.save(me);
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 }
