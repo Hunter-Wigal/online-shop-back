@@ -53,7 +53,7 @@ public class ProductController {
     }
 
     @GetMapping(path = "search")
-    public ResponseEntity<List<Product>> productSearch(@RequestParam("keyword") String keyword) {
+    public ResponseEntity<List<Product>> productSearch(@RequestParam String keyword) {
         List<Product> allProducts = this.productRepository.findAll();
         List<Product> matchingProducts = new ArrayList<>();
 

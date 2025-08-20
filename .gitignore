@@ -38,5 +38,6 @@ SecurityConstants.java
 *.properties
 
 compose.yaml
+compose.yml
 
 Dockerfile

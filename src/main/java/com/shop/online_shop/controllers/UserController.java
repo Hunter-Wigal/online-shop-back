@@ -54,7 +54,7 @@ public class UserController {
 
     // TODO make this use body instead of param
     @GetMapping("user")
-    public ResponseEntity<UserGetDto> getUser(@RequestParam("username") String username){
+    public ResponseEntity<UserGetDto> getUser(@RequestParam String username){
         Optional<User> check = this.userRepository.findByEmail(username);
 
         UserGetDto response;
@@ -99,7 +99,7 @@ public class UserController {
     }
 
     @DeleteMapping("{username}")
-    public ResponseEntity<Boolean> delete(@PathVariable("username") String username){
+    public ResponseEntity<Boolean> delete(@PathVariable String username){
         // implement logic here
         System.out.println(username);
         return new ResponseEntity<>(false, HttpStatus.NOT_IMPLEMENTED);
@@ -107,7 +107,7 @@ public class UserController {
 
 
     @PostMapping("{username}/cart")
-    public ResponseEntity<Boolean> addToCart(@PathVariable("username") String username, @RequestBody CartAddDto request){
+    public ResponseEntity<Boolean> addToCart(@PathVariable String username, @RequestBody CartAddDto request){
         Optional<User> user = this.userRepository.findByEmail(username);
 
         if(user.isEmpty()){

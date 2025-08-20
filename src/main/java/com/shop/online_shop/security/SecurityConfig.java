@@ -1,6 +1,5 @@
 package com.shop.online_shop.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +34,6 @@ public class SecurityConfig {
     @Value("${ALLOWED_ORIGINS}")
     String allowedOrigins;
 
-    @Autowired
     public SecurityConfig(JwtAuthEntryPoint authEntryPoint,
                           JwtAuthenticationFilter jwtAuthenticationFilter, AuthenticationProvider authenticationProvider) {
         this.authEntryPoint = authEntryPoint;
@@ -45,7 +43,7 @@ public class SecurityConfig {
 
     // Configures security options such as specific route permissions, cors, and csrf
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         //                        .ignoringRequestMatchers("/api/v1/auth/**")
         http
                 // Determine who is authorized at which endpoints
@@ -57,15 +55,15 @@ public class SecurityConfig {
                                 // TODO need to make sure users can only view their address
 //                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/address").authenticated()
                                 // Allow anyone to view products
-                                .requestMatchers(HttpMethod.GET, "api/v1/products/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                                 // Only allow admin to post to products api
-                                .requestMatchers(HttpMethod.POST, "api/v1/products/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasRole("ADMIN")
                                 // Change to only admin
-                                .requestMatchers(HttpMethod.PATCH, "api/v1/products/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/products/**").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.DELETE, "api/v1/products").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/products").hasRole("ADMIN")
                                 // Once tested, change to only allow admin to get order
-                                .requestMatchers(HttpMethod.GET, "api/v1/orders/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").hasRole("ADMIN")
                                 .requestMatchers("/actuator/**").permitAll()
 
 //                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").authenticated()
@@ -94,7 +92,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 

@@ -118,7 +118,7 @@ public class TransactionController {
 
 
     @DeleteMapping(path="{transaction_id}")
-    public ResponseEntity<Boolean> deleteTransaction(@PathVariable("transaction_id") int transaction_id){
+    public ResponseEntity<Boolean> deleteTransaction(@PathVariable int transaction_id){
         Optional<Transaction> toDelete = this.transactionRepository.findById(transaction_id);
 
         if(toDelete.isEmpty()){
@@ -130,7 +130,7 @@ public class TransactionController {
     }
 
     @PatchMapping(path="{transaction_id}/status")
-    public ResponseEntity<Boolean> updateStatus(@PathVariable("transaction_id") int transaction_id){
+    public ResponseEntity<Boolean> updateStatus(@PathVariable int transaction_id){
 
 
 
