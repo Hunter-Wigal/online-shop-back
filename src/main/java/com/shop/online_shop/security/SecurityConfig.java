@@ -44,6 +44,7 @@ public class SecurityConfig {
     // Configures security options such as specific route permissions, cors, and csrf
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        System.out.println(allowedOrigins);
         //                        .ignoringRequestMatchers("/api/v1/auth/**")
         http
                 // Determine who is authorized at which endpoints
@@ -52,8 +53,11 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                                 // Allow requesting user information if logged in
                                 .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
-                                // TODO need to make sure users can only view their address
-//                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/address").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/user/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/user/**").authenticated()
+                                // Allow adding new users
+                                .requestMatchers(HttpMethod.POST, "/api/v1/user/").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/address").authenticated()
                                 // Allow anyone to view products
                                 .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                                 // Only allow admin to post to products api
@@ -71,16 +75,6 @@ public class SecurityConfig {
                                 .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults())
-                // TODO figure out why this isn't working
-                // TODO add proper csrf protection
-                .csrf(AbstractHttpConfigurer::disable
-//                        .ignoringRequestMatchers("http://localhost:5173/**")
-
-                )
-                // Cors defined below
-//                .cors((cors)->{
-//                    cors.disable();
-//                })
                 .cors(withDefaults()) // Use corsConfigurationSource bean
                 // Handle exceptions elsewhere
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(authEntryPoint))

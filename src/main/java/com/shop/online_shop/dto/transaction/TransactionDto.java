@@ -7,6 +7,5 @@ public class TransactionDto {
     public Integer[] quantities;
     // Should be set by the server or admin
     //    public String status;
-    //TODO figure out later
     public String address;
 }

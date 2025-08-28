@@ -18,7 +18,7 @@ public class Address {
     @Id
     private int user_id; // Associated user
     @Id
-    private String street_address; // TODO check this, make sure it will always be unique
+    private String street_address;
 
 
     private boolean default_switch; // Default shipping address

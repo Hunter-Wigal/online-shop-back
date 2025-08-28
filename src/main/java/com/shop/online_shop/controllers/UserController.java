@@ -34,12 +34,6 @@ public class UserController {
         this.addressRepository = addressRepository;
     }
 
-    @GetMapping("/")
-    public List<User> getAllUsers(){
-        return this.userRepository.findAll();
-    }
-
-
     @PostMapping
     public void addUser(@RequestBody NewUserDto request){
         User user = new User();
@@ -52,7 +46,6 @@ public class UserController {
 
 
 
-    // TODO make this use body instead of param
     @GetMapping("user")
     public ResponseEntity<UserGetDto> getUser(@RequestParam String username){
         Optional<User> check = this.userRepository.findByEmail(username);
@@ -79,8 +72,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    //TODO change this to a patch mapping with a path variable for the username
-    @PutMapping("user")
+    @PatchMapping("user")
     public ResponseEntity<String> updateUser(@RequestBody NewUserDto request){
         Optional<User> check = this.userRepository.findByEmail(request.email);
 
@@ -223,7 +215,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        Address newAddress = getAddress(newAddressRequest, user);
+        Address newAddress = getAddress(newAddressRequest, user.get());
 
         addressRepository.save(newAddress);
 
@@ -231,7 +223,7 @@ public class UserController {
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-    private static Address getAddress(NewUserAddressDto newAddressRequest, Optional<User> user) {
+    private static Address getAddress(NewUserAddressDto newAddressRequest, User user) {
         Address newAddress = new Address();
 
         newAddress.setStreet_address(newAddressRequest.street);
@@ -241,8 +233,7 @@ public class UserController {
         newAddress.setCountry(newAddressRequest.country);
         newAddress.setZip_code(newAddressRequest.zip_code);
 
-        newAddress.setUser_id(user.get().getUser_id());
-        // TODO Make only one address default at a time
+        newAddress.setUser_id(user.getUser_id());
         newAddress.setDefault_switch(true);
         return newAddress;
     }

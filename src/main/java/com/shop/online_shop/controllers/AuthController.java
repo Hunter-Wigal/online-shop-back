@@ -46,7 +46,6 @@ public class AuthController {
 
     @EventListener(ContextRefreshedEvent.class)
     private void addTempUser() {
-        // TODO remove the temp user
         RegisterDto testUser = new RegisterDto();
         testUser.setEmail("test@gmail.com");
         testUser.setPassword("password");

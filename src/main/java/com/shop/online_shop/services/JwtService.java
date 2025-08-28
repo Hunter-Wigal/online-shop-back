@@ -2,15 +2,13 @@ package com.shop.online_shop.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,8 +18,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     @Value("${JWT_SECRET}")
-    private String SECRET_KEY;
-
+    private String jwt_secret;
 
     // Extract functions decodes the jwt to get stored info
     public String extractUsername(String token){
@@ -41,13 +38,12 @@ public class JwtService {
                                 UserDetails userDetails
     ){
         return Jwts.builder()
-                //TODO use non-deprecated functions
-                .setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
                 // Expiration date is 24 hours from the time the token was generated
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .signWith(getSignInKey())
                 .compact();
     }
     
@@ -66,14 +62,14 @@ public class JwtService {
 
     private Claims extractAllClaims(String token){
         return Jwts.parser()
-                .setSigningKey(getSignInKey())
+                .verifyWith((SecretKey) getSignInKey())
                 .build()
                 .parseSignedClaims(token)
-                .getBody();
+                .getPayload();
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(jwt_secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

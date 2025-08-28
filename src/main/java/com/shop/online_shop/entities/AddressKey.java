@@ -9,7 +9,7 @@ class AddressKey implements Serializable {
 
     private int user_id; // Associated user
 
-    private String street_address; // TODO check this, make sure it will always be unique
+    private String street_address;
 
     public AddressKey(){
 
