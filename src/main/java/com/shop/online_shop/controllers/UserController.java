@@ -98,7 +98,7 @@ public class UserController {
     }
 
 
-    @PostMapping("{username}/cart")
+    @PostMapping("cart/{username}")
     public ResponseEntity<Boolean> addToCart(@PathVariable String username, @RequestBody CartAddDto request){
         Optional<User> user = this.userRepository.findByEmail(username);
 
@@ -118,7 +118,7 @@ public class UserController {
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-    @DeleteMapping("{username}/cart")
+    @DeleteMapping("cart/{username}")
     public ResponseEntity<Boolean> clearCart(@PathVariable String username){
         // Change to make sure that only the owner of the account can clear the cart
         Optional<User> user = this.userRepository.findByEmail(username);
@@ -135,7 +135,7 @@ public class UserController {
     }
 
 
-    @GetMapping("{username}/cart")
+    @GetMapping("cart/{username}")
     public ResponseEntity<CartGetDto> getCart(@PathVariable String username){
 
         Optional<User> user = this.userRepository.findByEmail(username);
@@ -157,7 +157,7 @@ public class UserController {
         return new ResponseEntity<>(cartGetDto, HttpStatus.OK);
     }
 
-    @DeleteMapping("{username}/cart/{index}")
+    @DeleteMapping("cart/{username}/{index}")
     public ResponseEntity<Boolean> deleteFromCart(@PathVariable String username, @PathVariable int index){
         Optional<User> user = this.userRepository.findByEmail(username);
 
@@ -182,7 +182,7 @@ public class UserController {
     }
 
 
-    @GetMapping("{username}/address")
+    @GetMapping("address/{username}")
     public ResponseEntity<List<Address>> getUserAddress(@PathVariable String username, @RequestHeader (name="Authorization") String token){
         // Need to make sure requesting user has the username provided
 
@@ -200,7 +200,7 @@ public class UserController {
 
 
 
-    @PostMapping("{username}/address")
+    @PostMapping("address/{username}")
     public ResponseEntity<Boolean> addUserAddress(@PathVariable String username,@RequestBody NewUserAddressDto newAddressRequest,
                                                   @RequestHeader (name="Authorization") String token){
         // Need to make sure requesting user has the username provided

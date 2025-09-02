@@ -9,7 +9,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -44,35 +43,35 @@ public class SecurityConfig {
     // Configures security options such as specific route permissions, cors, and csrf
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println(allowedOrigins);
-        //                        .ignoringRequestMatchers("/api/v1/auth/**")
+        String apiV = "/api/v1/";
         http
                 // Determine who is authorized at which endpoints
                 .authorizeHttpRequests(authorize -> authorize
-                                // Only allow posting at this route. Used for logging in and registering
-                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
-                                // Allow requesting user information if logged in
-                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/user/**").authenticated()
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/user/**").authenticated()
-                                // Allow adding new users
-                                .requestMatchers(HttpMethod.POST, "/api/v1/user/").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/address").authenticated()
-                                // Allow anyone to view products
-                                .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
-                                // Only allow admin to post to products api
-                                .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasRole("ADMIN")
-                                // Change to only admin
-                                .requestMatchers(HttpMethod.PATCH, "/api/v1/products/**").hasRole("ADMIN")
+                        //Controllers
+                        //Auth anybody can login, register, logout etc.
+                        .requestMatchers(apiV + "auth/**").permitAll()
+                        //Health not implemented yet
+                        .requestMatchers(apiV + "custom/**").permitAll()
+                        //Product
+                        .requestMatchers(HttpMethod.GET, apiV + "products/**").permitAll()
+                        // only admin can update products
+                        .requestMatchers(HttpMethod.POST, apiV + "products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, apiV + "products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, apiV + "products/**").hasRole("ADMIN")
+                        //Transaction
+                        .requestMatchers(HttpMethod.GET, apiV + "orders/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, apiV + "orders/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, apiV + "orders/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, apiV + "orders/**").hasRole("ADMIN")
+                        //User
+                        .requestMatchers(HttpMethod.GET, apiV + "user/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, apiV + "user/").permitAll()
+                        .requestMatchers(HttpMethod.POST, apiV + "user/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, apiV + "user/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, apiV + "user/**").authenticated()
 
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/products").hasRole("ADMIN")
-                                // Once tested, change to only allow admin to get order
-                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").hasRole("ADMIN")
-                                .requestMatchers("/actuator/**").permitAll()
 
-//                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").authenticated()
-                                // Temporary let every other request work
-                                .anyRequest().permitAll()
+                        .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults())
                 .cors(withDefaults()) // Use corsConfigurationSource bean
