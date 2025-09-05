@@ -12,6 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -48,8 +51,10 @@ public class SecurityConfig {
                 // Determine who is authorized at which endpoints
                 .authorizeHttpRequests(authorize -> authorize
                         //Controllers
-                        //Auth anybody can login, register, logout etc.
-                        .requestMatchers(apiV + "auth/**").permitAll()
+                        //Auth anybody can log in, register, logout etc.
+                        .requestMatchers(HttpMethod.POST, apiV + "auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, apiV + "auth/**").permitAll()
+//                        .requestMatchers(HttpMethod.POST, apiV + "auth/make_me_admin").authenticated()
                         //Health not implemented yet
                         .requestMatchers(apiV + "custom/**").permitAll()
                         //Product
@@ -65,12 +70,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, apiV + "orders/**").hasRole("ADMIN")
                         //User
                         .requestMatchers(HttpMethod.GET, apiV + "user/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, apiV + "user/").permitAll()
                         .requestMatchers(HttpMethod.POST, apiV + "user/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, apiV + "user/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, apiV + "user/**").authenticated()
-
-
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults())
@@ -81,6 +84,15 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider);
 
         http.addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        XorCsrfTokenRequestAttributeHandler delegate = new XorCsrfTokenRequestAttributeHandler();
+        // set the name of the attribute the CsrfToken will be populated on
+        delegate.setCsrfRequestAttributeName("_csrf");
+        // Use only the handle() method of XorCsrfTokenRequestAttributeHandler and the
+        // default implementation of resolveCsrfTokenValue() from CsrfTokenRequestHandler
+        CsrfTokenRequestHandler requestHandler = delegate::handle;
+        http.csrf(csrf -> csrf.csrfTokenRepository(tokenRepository).csrfTokenRequestHandler(requestHandler));
+//        http.csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
 
@@ -99,7 +111,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(allowed);
         // only allow these methods and headers
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Method", "Accept", "Access-Control-Allow-Origin"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Method", "Accept", "Access-Control-Allow-Origin", "X-XSRF-TOKEN"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 

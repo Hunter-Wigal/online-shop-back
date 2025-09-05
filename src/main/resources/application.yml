@@ -27,7 +27,7 @@ management:
         include:
         - health
         - info
-      base-path: /actuator
+      base-path: /api/v1/actuator
   endpoint:
     health:
       show-details: always

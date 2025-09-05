@@ -8,7 +8,6 @@ import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.RoleRepository;
 import com.shop.online_shop.repositories.UserRepository;
 import com.shop.online_shop.security.JWTGenerator;
-import jakarta.annotation.PostConstruct;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -149,4 +149,16 @@ public class AuthController {
         this.userRepository.save(me);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
+    @GetMapping("csrf")
+    public CsrfToken getCsrf(CsrfToken token){
+        return token;
+    }
+
+//    @GetMapping("csrf")
+//    public HttpExchange.Response getCsrfToken(HttpServletRequest request) {
+//        // https://github.com/spring-projects/spring-security/issues/12094#issuecomment-1294150717
+//        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+//        HttpExchange.Response response = new HttpExchange.Response();
+//        response.setHeader(csrfToken.getHeaderName(), csrfToken.getToken());
+//    }
 }
