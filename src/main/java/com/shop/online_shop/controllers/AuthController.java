@@ -149,7 +149,7 @@ public class AuthController {
         this.userRepository.save(me);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
-    @GetMapping("csrf")
+    @PostMapping("csrf")
     public CsrfToken getCsrf(CsrfToken token){
         return token;
     }

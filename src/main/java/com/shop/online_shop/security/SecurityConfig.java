@@ -91,7 +91,7 @@ public class SecurityConfig {
         // Use only the handle() method of XorCsrfTokenRequestAttributeHandler and the
         // default implementation of resolveCsrfTokenValue() from CsrfTokenRequestHandler
         CsrfTokenRequestHandler requestHandler = delegate::handle;
-        http.csrf(csrf -> csrf.csrfTokenRepository(tokenRepository).csrfTokenRequestHandler(requestHandler));
+        http.csrf(csrf -> csrf.csrfTokenRepository(tokenRepository).csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers(apiV +"auth/csrf"));
 //        http.csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
