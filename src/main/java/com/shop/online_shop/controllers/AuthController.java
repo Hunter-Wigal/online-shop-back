@@ -8,8 +8,6 @@ import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.RoleRepository;
 import com.shop.online_shop.repositories.UserRepository;
 import com.shop.online_shop.security.JWTGenerator;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -44,11 +43,12 @@ public class AuthController {
 
     }
 
-    @EventListener(ContextRefreshedEvent.class)
-    private void addTempUser() {
+    @Transactional
+//    @EventListener(ContextRefreshedEvent.class)
+    public void addTempUser(String email, String password, String roleName) {
         RegisterDto testUser = new RegisterDto();
-        testUser.setEmail("test@gmail.com");
-        testUser.setPassword("password");
+        testUser.setEmail(email);
+        testUser.setPassword(password);
 
         // Create new user and save to database
         User user = new User();
@@ -58,9 +58,12 @@ public class AuthController {
         user.setName("Test User");
         user.setCart(new ArrayList<>());
 
+        Optional<Roles> roles = roleRepository.findByName(roleName);
 
-//        Roles roles = roleRepository.findByName("USER").get();
-//        user.setRoles(Collections.singletonList(roles));
+        if (roles.isEmpty()) {
+            return;
+        }
+        user.setRoles(Collections.singletonList(roles.get()));
 
         userRepository.save(user);
     }
@@ -149,16 +152,9 @@ public class AuthController {
         this.userRepository.save(me);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
+
     @PostMapping("csrf")
-    public CsrfToken getCsrf(CsrfToken token){
+    public CsrfToken getCsrf(CsrfToken token) {
         return token;
     }
-
-//    @GetMapping("csrf")
-//    public HttpExchange.Response getCsrfToken(HttpServletRequest request) {
-//        // https://github.com/spring-projects/spring-security/issues/12094#issuecomment-1294150717
-//        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-//        HttpExchange.Response response = new HttpExchange.Response();
-//        response.setHeader(csrfToken.getHeaderName(), csrfToken.getToken());
-//    }
 }
