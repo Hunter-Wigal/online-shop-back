@@ -64,10 +64,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, apiV + "products/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, apiV + "products/**").hasAuthority("ADMIN")
                         //Transaction
-                        .requestMatchers(HttpMethod.GET, apiV + "orders/**").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.POST, apiV + "orders/**").permitAll()
+                        /*.requestMatchers(HttpMethod.GET, apiV + "orders/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, apiV + "orders/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, apiV + "orders/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, apiV + "orders/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, apiV + "orders/**").hasAuthority("ADMIN")*/
                         //User
                         .requestMatchers(HttpMethod.GET, apiV + "user/**").authenticated()
                         .requestMatchers(HttpMethod.POST, apiV + "user/**").authenticated()
