@@ -2,6 +2,7 @@ package com.shop.online_shop.controllers;
 
 import com.shop.online_shop.dto.transaction.PaypalAuthResponseDto;
 import com.shop.online_shop.dto.transaction.TransactionDto;
+import com.shop.online_shop.dto.user.CartAddDto;
 import com.shop.online_shop.entities.Transaction;
 import com.shop.online_shop.entities.Product;
 import com.shop.online_shop.entities.User;
@@ -181,7 +182,7 @@ public class TransactionController {
     }
 
 
-    public Object temp(String uri, HttpHeaders headers, Class<?> classType) {
+    public Object temp(String uri, HttpHeaders headers, Class<?> classType, double price) {
         WebClient client = WebClient.builder()
                 .baseUrl(PaypalUrl)
                 .build();
@@ -204,29 +205,34 @@ public class TransactionController {
                                 {
                                     "amount": {
                                         "currency_code": "USD",
-                                        "value": "100.00"
+                                        "value": "%.2f"
                                     }
                                 }
                             ]
                         }
-                        """)
+                        """.formatted(price))
                 .retrieve().bodyToMono(classType).block();
     }
 
 
     @PostMapping(path = "paypal/createorder")
-    public ResponseEntity<String> createPaypalOrder() {
+    public ResponseEntity<Object> createPaypalOrder(@RequestBody ArrayList<CartAddDto> paypalCart) {
         String token = getPaypalAuthToken();
+
+        double totalPrice = 0;
+        System.out.println(paypalCart.toString());
+        for(CartAddDto item: paypalCart){
+            double price = this.productRepository.getReferenceById(item.product_id).getPrice();
+            totalPrice += price;
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Object response = temp("/v2/checkout/orders", headers, Object.class);
+        Object response = temp("/v2/checkout/orders", headers, Object.class, totalPrice);
 
-        System.out.println(response);
-
-        return new ResponseEntity<String>("Test", HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 }
