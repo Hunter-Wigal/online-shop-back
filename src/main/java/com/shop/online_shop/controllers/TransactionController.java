@@ -9,8 +9,6 @@ import com.shop.online_shop.entities.User;
 import com.shop.online_shop.repositories.TransactionRepository;
 import com.shop.online_shop.repositories.ProductRepository;
 import com.shop.online_shop.repositories.UserRepository;
-import lombok.Data;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -21,10 +19,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
 
-@Data
-class PaypalRequestBody {
-    String grant_type;
-}
 
 @RestController
 //@CrossOrigin(origins = "${ALLOWED_ORIGINS}")
@@ -74,7 +68,7 @@ public class TransactionController {
         for (Transaction transaction : transactions) {
             User user = transaction.getUser_id();
             SafeUser safeUser = new SafeUser(user.getUser_id(), user.getName(), user.getEmail(), user.getAge());
-            SafeTransaction safeTransaction = new SafeTransaction(transaction.getTransaction_id(), transaction.getProducts(), safeUser, transaction.getQuantities(), transaction.getStatus());
+            SafeTransaction safeTransaction = new SafeTransaction(transaction.getTransactionId(), transaction.getProducts(), safeUser, transaction.getQuantities(), transaction.getStatus());
             safeTransactions.add(safeTransaction);
         }
 
@@ -113,7 +107,10 @@ public class TransactionController {
         Optional<Transaction> transaction = this.transactionRepository.findById(id);
 
         if (transaction.isEmpty()) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            transaction = this.transactionRepository.findByPaypalId(Integer.toString(id));
+
+            if (transaction.isEmpty())
+                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>(transaction.get(), HttpStatus.OK);
@@ -163,7 +160,6 @@ public class TransactionController {
     }
 
     private String getPaypalAuthToken() {
-        RestTemplate restTemplate = new RestTemplate();
         String url = PaypalUrl + "/v1/oauth2/token";
 
         HttpHeaders headers = new HttpHeaders();
@@ -182,57 +178,119 @@ public class TransactionController {
     }
 
 
-    public Object temp(String uri, HttpHeaders headers, Class<?> classType, double price) {
+    public Object sendRequest(String uri, HttpHeaders headers, Class<?> classType, String body, String type) {
         WebClient client = WebClient.builder()
                 .baseUrl(PaypalUrl)
                 .build();
-        return client.post()
-                .uri(uri)
-                .headers(httpHeaders -> httpHeaders.addAll(headers))
-                .bodyValue("""
-                              {
-                            "intent": "CAPTURE",
-                            "payment_source": {
-                                "paypal": {
-                                    "experience_context": {
-                                        "return_url": "https://developer.paypal.com",
-                                        "cancel_url": "https://www.bing.com",
-                                        "user_action": "PAY_NOW"
-                                    }
-                                }
-                            },
-                            "purchase_units": [
-                                {
-                                    "amount": {
-                                        "currency_code": "USD",
-                                        "value": "%.2f"
-                                    }
-                                }
-                            ]
-                        }
-                        """.formatted(price))
-                .retrieve().bodyToMono(classType).block();
+        if (type.equals("GET")) {
+            return client.get()
+                    .uri(uri)
+                    .headers(httpHeaders -> httpHeaders.addAll(headers))
+                    .retrieve().bodyToMono(classType).block();
+        } else if (type.equals("POST")) {
+            return client.post()
+                    .uri(uri)
+                    .headers(httpHeaders -> httpHeaders.addAll(headers))
+                    .bodyValue(body)
+                    .retrieve().bodyToMono(classType).block();
+        }
+
+        return new Object();
     }
 
 
-    @PostMapping(path = "paypal/createorder")
-    public ResponseEntity<Object> createPaypalOrder(@RequestBody ArrayList<CartAddDto> paypalCart) {
+    @PostMapping(path = "paypal/createorder/{user_email}")
+    public ResponseEntity<Object> createPaypalOrder(@RequestBody ArrayList<CartAddDto> paypalCart, @PathVariable String user_email) {
         String token = getPaypalAuthToken();
+        List<Product> products = new ArrayList<>();
+        Integer[] product_quantities = new Integer[paypalCart.size()];
 
+
+        CartAddDto item;
         double totalPrice = 0;
-        System.out.println(paypalCart.toString());
-        for(CartAddDto item: paypalCart){
+        for (int i = 0; i < paypalCart.size(); i++) {
+            item = paypalCart.get(i);
             double price = this.productRepository.getReferenceById(item.product_id).getPrice();
             totalPrice += price;
+            products.add(this.productRepository.getReferenceById(item.product_id));
+            product_quantities[i] = item.quantity;
         }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Object response = temp("/v2/checkout/orders", headers, Object.class, totalPrice);
+        String body = """
+                      {
+                    "intent": "CAPTURE",
+                    "payment_source": {
+                        "paypal": {
+                            "experience_context": {
+                                "return_url": "http://localhost:5173/success",
+                                "cancel_url": "http://localhost:5173/shop",
+                                "user_action": "PAY_NOW"
+                            }
+                        }
+                    },
+                    "purchase_units": [
+                        {
+                            "amount": {
+                                "currency_code": "USD",
+                                "value": "%.2f"
+                            }
+                        }
+                    ]
+                }
+                """.formatted(totalPrice);
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<String, String> response = (LinkedHashMap<String, String>) sendRequest("/v2/checkout/orders", headers, Object.class, body, "POST");
+        String id = response.get("id");
+        // Need to create a new transaction with the PayPal id
+        Transaction newTransaction = new Transaction();
+        Optional<User> user = this.customerRepository.findByEmail(user_email);
+        user.ifPresent(newTransaction::setUser_id);
+        newTransaction.setPaypalId(id);
+        newTransaction.setStatus("PENDING");
+        newTransaction.setProducts(products);
+        newTransaction.setQuantities(product_quantities);
+        this.transactionRepository.save(newTransaction);
+
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    // TODO check whether order was completed so we can return the correct response after capturing
+    private void checkOrderStatus(String orderId) {
+        // Will finish later
+
+        if (true) {
+            this.transactionRepository.findByPaypalId(orderId).get().setStatus("ORDER_COMPLETE");
+            this.transactionRepository.save(this.transactionRepository.findByPaypalId(orderId).get());
+        }
+    }
+
+    @PostMapping(path = "paypal/capture")
+    public ResponseEntity<Object> captureOrder(@RequestBody String orderId) {
+        String token = getPaypalAuthToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        orderId = orderId.replace("\"", "");
+        Object response = sendRequest("v2/checkout/orders/" + orderId + "/capture", headers, Object.class, "", "POST");
+        checkOrderStatus(orderId);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "paypal/getorder/{orderId}")
+    public ResponseEntity<Object> getPaypalOrder(@PathVariable String orderId) {
+        String token = getPaypalAuthToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Object response = sendRequest("/v2/checkout/orders/" + orderId, headers, Object.class, "", "GET");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

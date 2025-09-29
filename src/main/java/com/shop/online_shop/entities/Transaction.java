@@ -26,7 +26,8 @@ public class Transaction {
             strategy = GenerationType.SEQUENCE,
             generator = "transaction_id_sequence"
     )
-    private Integer transaction_id;
+    private Integer transactionId;
+    private String paypalId;
 
     // Joins the provided product with a row in the product table
     @ManyToMany(targetEntity = Product.class, cascade = CascadeType.ALL)
@@ -46,12 +47,12 @@ public class Transaction {
     private Integer[] quantities;
     private String status;
 
-    public Transaction(Integer transaction_id,
+    public Transaction(Integer transactionId,
                        List<Product> products,
                        User user_id,
                        Integer[] quantities,
                        String status){
-        this.transaction_id = transaction_id;
+        this.transactionId = transactionId;
         this.products = products;
         this.user_id = user_id;
         this.quantities = quantities;
@@ -63,18 +64,18 @@ public class Transaction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction transaction = (Transaction) o;
-        return Objects.equals(transaction_id, transaction.transaction_id) && Objects.equals(products, transaction.products) && Objects.equals(user_id, transaction.user_id) && Arrays.equals(quantities, transaction.quantities) && Objects.equals(status, transaction.status);
+        return Objects.equals(transactionId, transaction.transactionId) && Objects.equals(products, transaction.products) && Objects.equals(user_id, transaction.user_id) && Arrays.equals(quantities, transaction.quantities) && Objects.equals(status, transaction.status);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(transaction_id, products, user_id, Arrays.hashCode(quantities));
+        return Objects.hash(transactionId, products, user_id, Arrays.hashCode(quantities));
     }
 
     @Override
     public String toString() {
         return "Order{" +
-                "transaction_id=" + transaction_id +
+                "transaction_id=" + transactionId +
                 ", item_id=" + products +
                 ", user_id=" + user_id +
                 ", quantity=" + Arrays.toString(quantities) +
